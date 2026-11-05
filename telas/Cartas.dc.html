@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>letterclub — cartas</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Work+Sans:wght@400;500&amp;family=IBM+Plex+Mono:wght@500&amp;family=Homemade+Apple&amp;family=La+Belle+Aurore&amp;family=Caveat:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#fbf3ea}
+a{color:#c23b32}a:hover{color:#3a2620}
+:focus-visible{outline:2px solid #3a2620;outline-offset:2px}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #fbf3ea; color: #3a2620; font-family: 'Work Sans', 'Helvetica Neue', Arial, sans-serif;">
+<header style="max-width: 1360px; margin: 0 auto; box-sizing: border-box; padding: 28px 5%; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;">
+<a href="Main.dc.html" style="font-family: 'Instrument Serif', Georgia, serif; font-size: 34px; line-height: 1; text-decoration: none; color: #c23b32;">letterclub</a>
+<nav aria-label="Principal" style="display: flex; flex-wrap: wrap; align-items: center; gap: 28px; font-size: 14px; line-height: 20px; font-weight: 500;">
+<a href="Main.dc.html" style="text-decoration: none; padding: 12px 0; color: #3a2620;">início</a>
+<a href="Main.dc.html#como" style="text-decoration: none; padding: 12px 0; color: #3a2620;">como funciona</a>
+<a href="Mural.dc.html" style="text-decoration: none; padding: 12px 0; color: #3a2620;">mural</a>
+<a href="Clube.dc.html" style="text-decoration: none; padding: 12px 0; color: #3a2620;">o clube</a>
+<a href="Escrever.dc.html" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 22px; border-radius: 999px; background: #c23b32; color: #ffffff; text-decoration: none;">Escrever uma carta</a>
+</nav>
+</header>
+<main>
+<dc-import name="CartasSecao" hint-size="100%,860px"></dc-import>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":980}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>letterclub — seção de cartas</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Work+Sans:wght@400;500&amp;family=IBM+Plex+Mono:wght@500&amp;family=Homemade+Apple&amp;family=La+Belle+Aurore&amp;family=Caveat:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="lc-paper" style="background: #fbf3ea; color: #3a2620; font-family: 'Work Sans', 'Helvetica Neue', Arial, sans-serif;">
+<div style="max-width: 1360px; margin: 0 auto; box-sizing: border-box; padding: 24px 5% 72px; display: flex; flex-wrap: wrap; align-items: center; gap: 48px;">
+
+<section aria-labelledby="conceito" style="flex: 1 1 380px; max-width: 480px; min-width: 0; display: flex; flex-direction: column; gap: 28px;">
+<p style="margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500; color: #c23b32;">O CONCEITO</p>
+<h2 id="conceito" style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 48px; line-height: 50px; letter-spacing: -0.01em;">Uma carta escrita à mão, para alguém que você não conhece.</h2>
+<p style="margin: 0; font-size: 17px; line-height: 27px; color: #7a5a4e;">No letterclub ninguém tem rosto. Você escreve para um desconhecido, alguém escreve para você, e as cartas vão se cruzando pelo caminho — devagar, como devem ser.</p>
+<div style="display: flex; flex-direction: column; border-top: 1px solid #e8d5c6;">
+<div style="display: flex; gap: 20px; padding: 18px 0; border-bottom: 1px solid #e8d5c6;">
+<p style="margin: 0; flex: 0 0 110px; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 24px; line-height: 27px;">sem nome</p>
+<p style="margin: 0; font-size: 15px; line-height: 24px; color: #7a5a4e;">A sua cidade e a hora em que você escreveu são a sua assinatura.</p>
+</div>
+<div style="display: flex; gap: 20px; padding: 18px 0; border-bottom: 1px solid #e8d5c6;">
+<p style="margin: 0; flex: 0 0 110px; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 24px; line-height: 27px;">três canetas</p>
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px;">
+<span style="font-family: 'Homemade Apple', 'Segoe Script', cursive; font-size: 17px; line-height: 36px;">cursiva</span>
+<span style="font-family: 'La Belle Aurore', 'Segoe Script', cursive; font-size: 26px; line-height: 36px;">pena fina</span>
+<span style="font-family: 'Caveat', 'Segoe Print', cursive; font-size: 26px; line-height: 36px;">letra de forma</span>
+</div>
+</div>
+<div style="display: flex; gap: 20px; padding: 18px 0; border-bottom: 1px solid #e8d5c6;">
+<p style="margin: 0; flex: 0 0 110px; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 24px; line-height: 27px;">dois dias</p>
+<p style="margin: 0; font-size: 15px; line-height: 24px; color: #7a5a4e;">É o tempo que uma carta leva pra chegar. A espera faz parte.</p>
+</div>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 20px;">
+<a href="Escrever.dc.html" style="display: inline-flex; align-items: center; min-height: 52px; padding: 0 28px; border-radius: 999px; background: #c23b32; color: #ffffff; font-size: 14px; line-height: 20px; font-weight: 500; text-decoration: none;">Escrever uma carta</a>
+</div>
+</section>
+
+<section aria-label="Cartas de exemplo" onMouseEnter="{{hoverOn}}" onMouseLeave="{{hoverOff}}" onFocus="{{hoverOn}}" onBlur="{{hoverOff}}" style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 20px;">
+<div style="position: relative; width: 100%; height: 620px; overflow: hidden; display: flex; align-items: center; justify-content: center; perspective: 1600px;">
+<div style="position: relative; width: 340px; height: 480px; transform-style: preserve-3d; transform: {{ringTransform}}; transition: {{ringTransition}};">
+<sc-for list="{{letters}}" as="l" hint-placeholder-count="6">
+<article aria-hidden="{{l.hidden}}" style="position: absolute; inset: 0; box-sizing: border-box; padding: 28px; border-radius: 10px; background: {{l.bg}}; color: {{l.fg}}; box-shadow: 0 1px 2px rgba(58,38,32,0.08), 0 10px 28px rgba(58,38,32,0.10); display: flex; flex-direction: column; gap: 16px; backface-visibility: hidden; -webkit-backface-visibility: hidden; transform: {{l.transform}}; opacity: {{l.opacity}}; transition: {{cardTransition}};">
+<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;">
+<div style="display: flex; flex-direction: column; gap: 2px;">
+<p style="margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500; color: {{l.muted}};">{{l.postmark}}</p>
+<p style="margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500; color: {{l.muted}};">{{l.date}}</p>
+</div>
+<div style="flex: 0 0 auto;"><dc-import name="Selo" kind="{{l.stamp}}" hint-size="56px,50px"></dc-import></div>
+</div>
+<p style="margin: 0; flex: 1 1 auto; overflow: hidden; font-family: {{l.family}}; font-size: {{l.size}}; line-height: 36px; color: {{l.fg}}; background-image: repeating-linear-gradient(to bottom, transparent 0px, transparent 35px, {{l.rule}} 35px, {{l.rule}} 36px);">{{l.text}}</p>
+<p style="margin: 0; font-family: 'Homemade Apple', 'Segoe Script', cursive; font-size: 20px; line-height: 36px; color: {{l.sig}};">{{l.signature}}</p>
+</article>
+</sc-for>
+</div>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px;">
+<button type="button" onClick="{{prev}}" aria-label="Carta anterior" style="width: 52px; height: 52px; border-radius: 999px; border: 1.5px solid #a88676; background: #fffaf4; color: #3a2620; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
+<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>
+</button>
+<div style="display: flex; align-items: center;">
+<sc-for list="{{letters}}" as="d" hint-placeholder-count="6">
+<button type="button" onClick="{{d.pick}}" aria-label="{{d.dotLabel}}" aria-pressed="{{d.active}}" style="width: 44px; height: 44px; border: 0; background: transparent; padding: 0; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
+<span style="display: block; width: {{d.dotSize}}; height: 10px; border-radius: 999px; box-sizing: border-box; border: 1.5px solid {{d.dotBorder}}; background: {{d.dotFill}}; transition: width 300ms ease-out;"></span>
+</button>
+</sc-for>
+</div>
+<button type="button" onClick="{{next}}" aria-label="Próxima carta" style="width: 52px; height: 52px; border-radius: 999px; border: 1.5px solid #a88676; background: #fffaf4; color: #3a2620; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
+<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+</button>
+<button type="button" onClick="{{toggle}}" aria-label="{{toggleLabel}}" style="width: 52px; height: 52px; margin-left: 8px; border-radius: 999px; border: 1.5px solid #a88676; background: #fffaf4; color: #3a2620; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
+<sc-if value="{{paused}}" hint-placeholder-val="{{ false }}">
+<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5.5v13l10-6.5z"></path></svg>
+</sc-if>
+<sc-if value="{{playing}}" hint-placeholder-val="{{ true }}">
+<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9 6v12M15 6v12"></path></svg>
+</sc-if>
+</button>
+</div>
+<p aria-live="{{live}}" style="margin: 0; font-size: 13px; line-height: 18px; color: #7a5a4e; text-align: center;">{{caption}}</p>
+</section>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"autoplay":{"editor":"boolean","default":true},"autoplaySeconds":{"editor":"range","default":4,"min":2,"max":12,"step":0.5,"unit":"s"},"radius":{"editor":"range","default":380,"min":300,"max":520,"step":10,"unit":"px"},"$preview":{"width":1440,"height":860}}'>
+class Component extends DCLogic {
+  state = { pos: 0, paused: false, hover: false, reduce: false };
+  componentDidMount() {
+    let reduce = false;
+    try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+    if (reduce) this.setState({ paused: true, reduce: true });
+    this.schedule();
+  }
+  componentWillUnmount() { clearTimeout(this.timer); }
+  secs() {
+    const v = Number(this.props.autoplaySeconds ?? 4);
+    return Math.min(12, Math.max(2, isNaN(v) ? 4 : v));
+  }
+  schedule() {
+    clearTimeout(this.timer);
+    this.timer = setTimeout(() => {
+      const s = this.state || {};
+      if ((this.props.autoplay ?? true) && !s.paused && !s.hover) this.go(1);
+      else this.schedule();
+    }, this.secs() * 1000);
+  }
+  go(delta) {
+    this.setState({ pos: ((this.state && this.state.pos) || 0) + delta });
+    this.schedule();
+  }
+  data() {
+    const pens = {
+      cursiva: { family: "'Homemade Apple', 'Segoe Script', cursive", size: '19px', name: 'cursiva' },
+      fina: { family: "'La Belle Aurore', 'Segoe Script', cursive", size: '28px', name: 'pena fina' },
+      forma: { family: "'Caveat', 'Segoe Print', cursive", size: '26px', name: 'letra de forma' }
+    };
+    const tones = {
+      papel: { bg: '#fffaf4', fg: '#3a2620', muted: '#7a5a4e', rule: '#e8d5c6', sig: '#c23b32' },
+      coral: { bg: '#c23b32', fg: '#ffffff', muted: '#ffffff', rule: 'rgba(255,255,255,0.28)', sig: '#ffffff' },
+      ocre: { bg: '#d9a441', fg: '#3a2620', muted: '#3a2620', rule: 'rgba(58,38,32,0.2)', sig: '#3a2620' },
+      salvia: { bg: '#3f6b57', fg: '#fbf3ea', muted: '#fbf3ea', rule: 'rgba(251,243,234,0.24)', sig: '#fbf3ea' },
+      pessego: { bg: '#f2b8a2', fg: '#3a2620', muted: '#3a2620', rule: 'rgba(58,38,32,0.18)', sig: '#3a2620' },
+      blush: { bg: '#f6d9cf', fg: '#3a2620', muted: '#7a5a4e', rule: 'rgba(58,38,32,0.16)', sig: '#3a2620' }
+    };
+    return [
+      { city: 'São Paulo', hour: '23h', date: '02 NOV 2026', pen: pens.cursiva, tone: tones.papel,
+        text: 'Querida pessoa que eu não conheço, hoje a cidade estava barulhenta demais e eu pensei em você, que talvez também precise de um pouco de silêncio.' },
+      { city: 'Recife', hour: '6h', date: '29 OUT 2026', pen: pens.fina, tone: tones.coral,
+        text: 'Acordei antes do sol só pra te contar: o mar continua aqui. Ele espera sem pressa nenhuma.' },
+      { city: 'Porto Alegre', hour: '19h', date: '27 OUT 2026', pen: pens.forma, tone: tones.ocre,
+        text: 'Não sei seu nome, mas sei que você chegou até o fim de mais um dia. Isso já é muita coisa. Toma um chá por mim.' },
+      { city: 'Belém', hour: '14h', date: '24 OUT 2026', pen: pens.cursiva, tone: tones.salvia,
+        text: 'Choveu às duas, como sempre. Aprendi que dá pra marcar encontro com a chuva. Talvez dê com você também.' },
+      { city: 'Lisboa', hour: '2h', date: '20 OUT 2026', pen: pens.fina, tone: tones.pessego,
+        text: 'Escrevo de longe, com a janela aberta. Se você estiver triste, saiba que alguém acordado pensou em você.' },
+      { city: 'Belo Horizonte', hour: '17h', date: '18 OUT 2026', pen: pens.forma, tone: tones.blush,
+        text: 'Hoje aprendi a fazer pão. Ficou feio e muito gostoso. Acho que a maioria das coisas boas é assim.' }
+    ];
+  }
+  renderVals() {
+    const st = this.state || {};
+    const list = this.data();
+    const n = list.length;
+    const step = 360 / n;
+    const R = Number(this.props.radius ?? 380) || 380;
+    const pos = st.pos || 0;
+    const active = ((pos % n) + n) % n;
+    const letters = list.map((l, i) => {
+      let d = Math.abs(i - active);
+      d = Math.min(d, n - d);
+      return {
+        stamp: ['cidade', 'sol', 'cha', 'chuva', 'lua', 'pao'][i] || 'sol',
+        postmark: (l.city + ' · ' + l.hour).toUpperCase(),
+        date: l.date,
+        text: l.text,
+        signature: '— alguém de ' + l.city,
+        family: l.pen.family,
+        size: l.pen.size,
+        bg: l.tone.bg, fg: l.tone.fg, muted: l.tone.muted, rule: l.tone.rule, sig: l.tone.sig,
+        transform: 'rotateY(' + (i * step) + 'deg) translateZ(' + R + 'px)',
+        opacity: d === 0 ? 1 : d === 1 ? 0.55 : 0.2,
+        hidden: d === 0 ? 'false' : 'true',
+        active: i === active ? 'true' : 'false',
+        dotLabel: 'Carta de ' + l.city,
+        dotSize: i === active ? '28px' : '10px',
+        dotFill: i === active ? '#c23b32' : 'transparent',
+        dotBorder: i === active ? '#c23b32' : '#a88676',
+        pick: () => {
+          let delta = i - active;
+          if (delta > n / 2) delta -= n;
+          if (delta < -n / 2) delta += n;
+          this.go(delta);
+        }
+      };
+    });
+    const a = list[active];
+    return {
+      letters,
+      ringTransform: 'translateZ(-' + R + 'px) rotateY(' + (-pos * step) + 'deg)',
+      ringTransition: st.reduce ? 'none' : 'transform 800ms cubic-bezier(.22,.61,.36,1)',
+      cardTransition: 'opacity 600ms ease-out',
+      caption: 'Carta ' + (active + 1) + ' de ' + n + ' · escrita em ' + a.city + ', às ' + a.hour + ', com a caneta ' + a.pen.name,
+      prev: () => this.go(-1),
+      next: () => this.go(1),
+      paused: !!st.paused,
+      playing: !st.paused,
+      toggleLabel: st.paused ? 'Tocar as cartas automaticamente' : 'Pausar as cartas',
+      toggle: () => { this.setState({ paused: !(this.state && this.state.paused) }); this.schedule(); },
+      hoverOn: () => this.setState({ hover: true }),
+      hoverOff: () => this.setState({ hover: false }),
+      live: (st.paused || st.hover) ? 'polite' : 'off'
+    };
+  }
+}
+</script>
+</body>
+</html>

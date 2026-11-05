@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>letterclub — sua caixa de correio</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Work+Sans:wght@400;500&amp;family=IBM+Plex+Mono:wght@500&amp;family=Homemade+Apple&amp;family=La+Belle+Aurore&amp;family=Caveat:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#fbf3ea}
+a{color:#c23b32}a:hover{color:#3a2620}
+:focus-visible{outline:2px solid #3a2620;outline-offset:2px}
+.lc-env{transition:transform 300ms ease-out, box-shadow 300ms ease-out}
+.lc-env:hover{transform:translateY(-2px);box-shadow:0 2px 4px rgba(58,38,32,0.10), 0 18px 40px rgba(194,59,50,0.16) !important}
+@keyframes lc-rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes lc-fade{from{opacity:0}to{opacity:1}}
+@keyframes lc-unfold{from{opacity:0;transform:translateY(60px) scale(.92)}to{opacity:1;transform:none}}
+@keyframes lc-pulse{0%,100%{opacity:.55}50%{opacity:1}}
+@media (prefers-reduced-motion: reduce){
+*{animation-duration:1ms !important;animation-iteration-count:1 !important;animation-delay:0ms !important;transition:none !important}
+}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #fbf3ea; color: #3a2620; font-family: 'Work Sans', 'Helvetica Neue', Arial, sans-serif;">
+
+<header style="max-width: 1360px; margin: 0 auto; box-sizing: border-box; padding: 28px 5%; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;">
+<a href="Main.dc.html" style="font-family: 'Instrument Serif', Georgia, serif; font-size: 34px; line-height: 1; text-decoration: none; color: #c23b32;">letterclub</a>
+<nav aria-label="Principal" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; font-size: 14px; line-height: 20px; font-weight: 500;">
+<a href="Mural.dc.html" style="text-decoration: none; padding: 12px 0; color: #3a2620;">mural</a>
+<a href="Clube.dc.html" style="text-decoration: none; padding: 12px 0; color: #3a2620;">o clube</a>
+<a href="Caixa.dc.html" aria-current="page" style="text-decoration: underline; text-underline-offset: 6px; padding: 12px 0; color: #c23b32;">sua caixa</a>
+<a href="Escrever.dc.html" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 22px; border-radius: 999px; background: #c23b32; color: #ffffff; text-decoration: none;">Escrever uma carta</a>
+</nav>
+</header>
+
+<main style="max-width: 1360px; margin: 0 auto; box-sizing: border-box; padding: 16px 5% 96px; display: flex; flex-direction: column; gap: 40px;">
+<div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px; animation: lc-rise 700ms cubic-bezier(.22,.61,.36,1) both;">
+<div style="display: flex; flex-direction: column; gap: 12px;">
+<p style="margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500; color: #c23b32;">ALGUÉM DE SÃO PAULO · Nº 0428</p>
+<h1 style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: clamp(48px, 5vw, 72px); line-height: 1; letter-spacing: -0.02em;">Sua caixa de <em style="font-style: italic; color: #c23b32;">correio</em>.</h1>
+<p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 24px; line-height: 30px; color: #7a5a4e;">{{greeting}}</p>
+</div>
+<div role="group" aria-label="Gavetas" style="display: inline-flex; padding: 4px; border-radius: 999px; background: #f6d9cf; gap: 4px;">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="3">
+<button type="button" onClick="{{t.pick}}" aria-pressed="{{t.selected}}" style="min-height: 44px; padding: 0 20px; border-radius: 999px; border: 0; background: {{t.bg}}; color: #3a2620; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer; box-shadow: {{t.shadow}};">{{t.name}}</button>
+</sc-for>
+</div>
+</div>
+
+<sc-if value="{{isInbox}}" hint-placeholder-val="{{ true }}">
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 40px 32px; padding-top: 24px;">
+<sc-for list="{{inbox}}" as="r" hint-placeholder-count="4">
+<button type="button" onClick="{{r.open}}" aria-label="{{r.aria}}" class="lc-env" style="position: relative; padding: 0; border: 0; background: transparent; font-family: inherit; cursor: pointer; text-align: left; animation: lc-rise 600ms cubic-bezier(.22,.61,.36,1) {{r.delay}} both;">
+<sc-if value="{{r.opened}}" hint-placeholder-val="{{ false }}">
+<span aria-hidden="true" style="position: absolute; left: 12%; right: 12%; top: -26px; height: 70px; border-radius: 6px 6px 0 0; background-color: {{r.paper}}; background-image: repeating-linear-gradient(to bottom, transparent 0px, transparent 17px, {{r.rule}} 17px, {{r.rule}} 18px); box-shadow: 0 -2px 10px rgba(58,38,32,0.10); transform: rotate(-2deg); overflow: hidden; padding: 10px 14px; box-sizing: border-box;">
+<span style="display: block; font-family: {{r.family}}; font-size: {{r.peekSize}}; line-height: 18px; color: {{r.fg}}; white-space: nowrap;">{{r.excerpt}}</span>
+</span>
+</sc-if>
+<span style="position: relative; display: block; aspect-ratio: 16 / 10; border-radius: 10px; background: {{r.env}}; box-shadow: 0 1px 2px rgba(58,38,32,0.08), 0 10px 28px rgba(58,38,32,0.12); overflow: hidden;">
+<svg aria-hidden="true" viewBox="0 0 160 100" preserveAspectRatio="none" style="position: absolute; inset: 0; width: 100%; height: 100%;"><path d="{{r.flap}}" fill="none" stroke="{{r.line}}" stroke-width="0.8"></path><path d="M0 100 L62 46 M160 100 L98 46" fill="none" stroke="{{r.line}}" stroke-width="0.6" opacity="0.6"></path></svg>
+<sc-if value="{{r.sealed}}" hint-placeholder-val="{{ true }}">
+<span aria-hidden="true" style="position: absolute; left: 50%; top: 58%; width: 52px; height: 52px; margin: -26px 0 0 -26px; border-radius: 50%; background: #c23b32; box-shadow: 0 2px 6px rgba(58,38,32,0.3); display: flex; align-items: center; justify-content: center;"><span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 28px; line-height: 1; color: #fbf3ea;">l</span></span>
+</sc-if>
+<span style="position: absolute; right: 6%; top: 9%;"><dc-import name="Selo" kind="{{r.stamp}}" hint-size="50px,50px"></dc-import></span>
+<span style="position: absolute; left: 7%; top: 10%; display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: {{r.chipBg}}; color: {{r.chipFg}}; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 10px; line-height: 14px; letter-spacing: 0.14em; font-weight: 500;">{{r.status}}</span>
+<span style="position: absolute; left: 7%; bottom: 10%; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500; color: {{r.ink}};">{{r.from}}</span>
+</span>
+</button>
+</sc-for>
+
+<div aria-label="Uma carta a caminho" style="position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; aspect-ratio: 16 / 10; border-radius: 10px; border: 1.5px dashed #a88676; text-align: center; padding: 24px; box-sizing: border-box; animation: lc-rise 600ms cubic-bezier(.22,.61,.36,1) 300ms both;">
+<span style="font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500; color: #7a5a4e; animation: lc-pulse 2.4s ease-in-out infinite;">A CAMINHO · CHEGA AMANHÃ</span>
+<span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 26px; line-height: 30px;">alguém de Manaus escreveu pra você.</span>
+<span style="font-size: 13px; line-height: 18px; color: #7a5a4e;">Cartas levam dois dias. Ela já está no caminho.</span>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isSent}}" hint-placeholder-val="{{ false }}">
+<ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; border-top: 1px solid #a88676;">
+<sc-for list="{{sent}}" as="s" hint-placeholder-count="3">
+<li style="display: flex; flex-wrap: wrap; align-items: center; gap: 20px 28px; padding: 24px 0; border-bottom: 1px solid #e8d5c6; animation: lc-rise 500ms ease-out {{s.delay}} both;">
+<div aria-hidden="true" style="flex: 0 0 auto; width: 72px; height: 92px; border-radius: 6px; background-color: {{s.paper}}; background-image: repeating-linear-gradient(to bottom, transparent 0px, transparent 11px, {{s.rule}} 11px, {{s.rule}} 12px); box-shadow: 0 4px 12px rgba(58,38,32,0.14); transform: rotate({{s.tilt}});"></div>
+<div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 6px;">
+<p style="margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500; color: #7a5a4e;">{{s.meta}}</p>
+<p style="margin: 0; font-family: {{s.family}}; font-size: {{s.size}}; line-height: 32px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{s.excerpt}}</p>
+</div>
+<span style="flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px; min-height: 32px; padding: 0 14px; border-radius: 999px; background: {{s.chipBg}}; color: {{s.chipFg}}; font-size: 13px; line-height: 18px; font-weight: 500;">
+<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{s.icon}}"></path></svg>
+{{s.status}}
+</span>
+<button type="button" onClick="{{s.togglePublish}}" aria-pressed="{{s.publishedPressed}}" style="flex: 0 0 auto; min-height: 44px; padding: 0 6px; border: 0; background: transparent; color: #3a2620; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 10px;">
+<span aria-hidden="true" style="position: relative; width: 40px; height: 24px; border-radius: 999px; background: {{s.trackBg}}; transition: background-color 240ms ease-out;"><span style="position: absolute; top: 3px; left: {{s.knobLeft}}; width: 18px; height: 18px; border-radius: 50%; background: #ffffff; box-shadow: 0 1px 3px rgba(58,38,32,0.3); transition: left 240ms ease-out;"></span></span>
+Pendurar no mural
+</button>
+</li>
+</sc-for>
+</ul>
+<p style="margin: 0; font-size: 13px; line-height: 18px; color: #7a5a4e;">Cartas penduradas no mural aparecem sem nome, só com a cidade e a hora. Dá pra tirar quando quiser.</p>
+</sc-if>
+
+<sc-if value="{{isDrafts}}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{hasDraft}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 40px; padding: 32px; border-radius: 24px; background: #f6d9cf; animation: lc-rise 500ms ease-out both;">
+<div aria-hidden="true" style="flex: 0 0 auto; width: 240px; height: 300px; box-sizing: border-box; padding: 24px 22px; border-radius: 10px; background-color: {{draft.paper}}; color: {{draft.fg}}; background-image: repeating-linear-gradient(to bottom, transparent 0px, transparent 27px, {{draft.rule}} 27px, {{draft.rule}} 28px); box-shadow: 0 10px 28px rgba(58,38,32,0.18); transform: rotate(-2deg); overflow: hidden;">
+<span style="font-family: {{draft.family}}; font-size: {{draft.size}}; line-height: 28px;">{{draft.excerpt}}</span>
+</div>
+<div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 14px;">
+<p style="margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500; color: #7a5a4e;">{{draft.meta}}</p>
+<p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 36px; line-height: 40px;">Você parou no meio de uma carta.</p>
+<p style="margin: 0; font-size: 17px; line-height: 27px; color: #7a5a4e;">Tudo bem. Ela ficou guardada do jeitinho que você deixou — caneta, papel e cada palavra.</p>
+<div style="display: flex; flex-wrap: wrap; gap: 12px;">
+<a href="Escrever.dc.html" style="display: inline-flex; align-items: center; min-height: 52px; padding: 0 28px; border-radius: 999px; background: #c23b32; color: #ffffff; font-size: 14px; line-height: 20px; font-weight: 500; text-decoration: none;">Continuar escrevendo</a>
+<button type="button" onClick="{{discardDraft}}" style="min-height: 52px; padding: 0 24px; border-radius: 999px; border: 1.5px solid #a88676; background: transparent; color: #3a2620; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer;">Descartar rascunho</button>
+</div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{noDraft}}" hint-placeholder-val="{{ true }}">
+<div style="padding: 96px 24px; display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; animation: lc-rise 500ms ease-out both;">
+<p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 36px; line-height: 40px;">Nenhum rascunho. Por enquanto.</p>
+<p style="margin: 0; max-width: 440px; font-size: 17px; line-height: 27px; color: #7a5a4e;">Comece uma carta e pode fechar a página no meio: ela fica guardada aqui até você voltar.</p>
+<a href="Escrever.dc.html" style="display: inline-flex; align-items: center; min-height: 52px; padding: 0 28px; border-radius: 999px; background: #c23b32; color: #ffffff; font-size: 14px; line-height: 20px; font-weight: 500; text-decoration: none;">Escrever uma carta</a>
+</div>
+</sc-if>
+</sc-if>
+</main>
+
+<sc-if value="{{reading}}" hint-placeholder-val="{{ false }}">
+<div style="position: fixed; inset: 0; z-index: 40; background: rgba(31,23,21,0.62); display: flex; align-items: flex-start; justify-content: center; padding: 48px 24px; box-sizing: border-box; overflow-y: auto; animation: lc-fade 240ms ease-out both;">
+<div role="dialog" aria-modal="true" aria-label="{{letter.aria}}" style="width: 100%; max-width: 600px; display: flex; flex-direction: column; gap: 20px; animation: lc-unfold 600ms cubic-bezier(.22,.61,.36,1) both;">
+<article style="box-sizing: border-box; padding: 44px 48px 32px; border-radius: 10px; background: {{letter.paper}}; color: {{letter.fg}}; box-shadow: 0 2px 4px rgba(0,0,0,0.2), 0 30px 60px rgba(0,0,0,0.3); display: flex; flex-direction: column; gap: 20px; transform: rotate(-0.5deg);">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;">
+<div style="display: flex; flex-direction: column; gap: 2px;">
+<p style="margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500; color: {{letter.muted}};">{{letter.postmark}}</p>
+<p style="margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500; color: {{letter.muted}};">{{letter.date}}</p>
+</div>
+<dc-import name="Selo" kind="{{letter.stamp}}" hint-size="50px,50px"></dc-import>
+</div>
+<p style="margin: 0; font-family: {{letter.family}}; font-size: {{letter.size}}; line-height: 36px; background-image: repeating-linear-gradient(to bottom, transparent 0px, transparent 35px, {{letter.rule}} 35px, {{letter.rule}} 36px);">{{letter.text}}</p>
+<p style="margin: 0; align-self: flex-end; font-family: 'Homemade Apple', 'Segoe Script', cursive; font-size: 20px; line-height: 36px; color: {{letter.sig}};">{{letter.signature}}</p>
+</article>
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px;">
+<a href="Escrever.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 52px; padding: 0 26px; border-radius: 999px; background: #c23b32; color: #ffffff; font-size: 14px; line-height: 20px; font-weight: 500; text-decoration: none;">
+<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5M4 9h10a6 6 0 0 1 6 6v5"></path></svg>
+Responder
+</a>
+<button type="button" onClick="{{toggleKeep}}" aria-pressed="{{keepPressed}}" style="min-height: 52px; padding: 0 22px; border-radius: 999px; border: 1.5px solid #fbf3ea; background: {{keepBg}}; color: {{keepFg}}; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="{{keepFill}}" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg>
+{{keepLabel}}
+</button>
+<button type="button" onClick="{{closeLetter}}" style="min-height: 52px; padding: 0 22px; border-radius: 999px; border: 0; background: transparent; color: #fbf3ea; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer; text-decoration: underline; text-underline-offset: 4px;">Guardar na caixa e fechar</button>
+</div>
+<p style="margin: 0; text-align: center; font-size: 13px; line-height: 18px; color: #fbf3ea;">Sua resposta vai pra mesma pessoa. Vocês continuam sem se conhecer.</p>
+</div>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1200}}'>
+class Component extends DCLogic {
+  state = { tab: 0, opened: { r3: true, r4: true }, reading: null, kept: { r3: true }, published: { s2: true }, draft: null };
+  componentDidMount() { this.loadDraft(); }
+  loadDraft() {
+    try {
+      const raw = window.localStorage.getItem('letterclub:rascunho');
+      const d = raw ? JSON.parse(raw) : null;
+      this.setState({ draft: d && d.text ? d : null });
+    } catch (e) { this.setState({ draft: null }); }
+  }
+  pens() {
+    return [
+      { family: "'Homemade Apple', 'Segoe Script', cursive", size: '19px', small: '13px', name: 'cursiva' },
+      { family: "'La Belle Aurore', 'Segoe Script', cursive", size: '28px', small: '19px', name: 'pena fina' },
+      { family: "'Caveat', 'Segoe Print', cursive", size: '26px', small: '19px', name: 'letra de forma' }
+    ];
+  }
+  papers() {
+    return [
+      { bg: '#fffaf4', fg: '#3a2620', muted: '#7a5a4e', rule: '#e8d5c6', sig: '#c23b32' },
+      { bg: '#f6d9cf', fg: '#3a2620', muted: '#7a5a4e', rule: 'rgba(58,38,32,0.16)', sig: '#3a2620' },
+      { bg: '#f2b8a2', fg: '#3a2620', muted: '#3a2620', rule: 'rgba(58,38,32,0.18)', sig: '#3a2620' },
+      { bg: '#d9a441', fg: '#3a2620', muted: '#3a2620', rule: 'rgba(58,38,32,0.2)', sig: '#3a2620' },
+      { bg: '#3f6b57', fg: '#fbf3ea', muted: '#fbf3ea', rule: 'rgba(251,243,234,0.24)', sig: '#fbf3ea' },
+      { bg: '#c23b32', fg: '#ffffff', muted: '#ffffff', rule: 'rgba(255,255,255,0.28)', sig: '#ffffff' }
+    ];
+  }
+  inboxData() {
+    return [
+      { id: 'r1', city: 'Curitiba', hour: '22h', date: '05 NOV 2026', arrived: 'CHEGOU HOJE', pen: 1, paper: 1, stamp: 'frio', env: '#fffaf4', line: 'rgba(58,38,32,0.25)', ink: '#3a2620',
+        text: 'Hoje o dia foi cinza do começo ao fim. Mas encontrei um café bom e pensei que alguém merecia saber. Esse alguém é você.' },
+      { id: 'r2', city: 'Salvador', hour: '9h', date: '04 NOV 2026', arrived: 'CHEGOU ONTEM', pen: 2, paper: 3, stamp: 'mar', env: '#f2b8a2', line: 'rgba(58,38,32,0.28)', ink: '#3a2620',
+        text: 'Escrevo da varanda, com o barulho do mar de fundo. Não sei o que você está vivendo, mas desejo que hoje tenha um pedaço de calma nele.' },
+      { id: 'r3', city: 'Porto Alegre', hour: '18h', date: '02 NOV 2026', arrived: 'CHEGOU 02 NOV', pen: 0, paper: 0, stamp: 'cha', env: '#d9a441', line: 'rgba(58,38,32,0.3)', ink: '#3a2620',
+        text: 'Obrigada por existir do outro lado desta carta. Às vezes isso basta pra um dia inteiro.' },
+      { id: 'r4', city: 'Belém', hour: '15h', date: '29 OUT 2026', arrived: 'CHEGOU 29 OUT', pen: 2, paper: 4, stamp: 'chuva', env: '#3f6b57', line: 'rgba(251,243,234,0.35)', ink: '#fbf3ea',
+        text: 'Choveu de novo. Fiquei olhando a janela e lembrei que a gente se preocupa demais com coisas que a chuva lava sozinha.' }
+    ];
+  }
+  renderVals() {
+    const st = this.state || {};
+    const P = this.pens();
+    const T = this.papers();
+    const tab = st.tab || 0;
+    const opened = st.opened || {};
+    const kept = st.kept || {};
+    const published = st.published || {};
+    const inboxRaw = this.inboxData();
+    const unopened = inboxRaw.filter((r) => !opened[r.id]).length;
+
+    const inbox = inboxRaw.map((r, i) => {
+      const isOpen = !!opened[r.id];
+      const t = T[r.paper];
+      const p = P[r.pen];
+      return {
+        aria: (isOpen ? 'Reler carta de ' : 'Abrir carta de ') + r.city,
+        delay: (i * 80) + 'ms',
+        opened: isOpen, sealed: !isOpen,
+        flap: isOpen ? 'M0 0 L80 -30 L160 0' : 'M0 0 L80 58 L160 0',
+        env: r.env, line: r.line, ink: r.ink, stamp: r.stamp,
+        status: isOpen ? r.arrived : r.arrived + ' · FECHADA',
+        chipBg: isOpen ? 'transparent' : '#3a2620',
+        chipFg: isOpen ? r.ink : '#fbf3ea',
+        from: 'DE: ALGUÉM DE ' + r.city.toUpperCase(),
+        paper: t.bg, rule: t.rule, fg: t.fg, family: p.family, peekSize: p.small,
+        excerpt: r.text.slice(0, 40) + '…',
+        open: () => {
+          const o = Object.assign({}, (this.state && this.state.opened) || {});
+          o[r.id] = true;
+          this.setState({ opened: o, reading: r.id });
+        }
+      };
+    });
+
+    const cur = inboxRaw.find((r) => r.id === st.reading) || inboxRaw[0];
+    const ct = T[cur.paper];
+    const cp = P[cur.pen];
+
+    const SENT = [
+      { id: 's1', date: '05 NOV', pen: 0, paper: 0, tilt: '-3deg', kind: 'way', text: 'Querida pessoa que eu não conheço, hoje a cidade estava barulhenta demais e eu pensei em você.' },
+      { id: 's2', date: '01 NOV', pen: 1, paper: 5, tilt: '2deg', kind: 'done', text: 'Acordei antes do sol só pra te contar: o mar continua aqui.' },
+      { id: 's3', date: '27 OUT', pen: 2, paper: 3, tilt: '-1deg', kind: 'mail', text: 'Não sei seu nome, mas sei que você chegou até o fim de mais um dia.' }
+    ];
+    const STATUS = {
+      way: { label: 'A caminho · chega em 2 dias', bg: '#f6d9cf', fg: '#3a2620', icon: 'M5 12h11M12 7l5 5-5 5' },
+      done: { label: 'Entregue', bg: '#3f6b57', fg: '#fbf3ea', icon: 'M5 12.5l4.5 4.5L19 7.5' },
+      mail: { label: 'Entregue pelo correio', bg: '#d9a441', fg: '#3a2620', icon: 'M3 6h18v12H3z M3 7l9 6 9-6' }
+    };
+    const sent = SENT.map((s, i) => {
+      const on = !!published[s.id];
+      const t = T[s.paper];
+      const p = P[s.pen];
+      const stt = STATUS[s.kind];
+      return {
+        delay: (i * 70) + 'ms',
+        paper: t.bg, rule: t.rule, tilt: s.tilt,
+        meta: 'PARA: ALGUÉM · ' + s.date + ' · CANETA ' + p.name.toUpperCase(),
+        family: p.family, size: p.small === '13px' ? '15px' : '22px',
+        excerpt: s.text,
+        status: stt.label, chipBg: stt.bg, chipFg: stt.fg, icon: stt.icon,
+        publishedPressed: on ? 'true' : 'false',
+        trackBg: on ? '#c23b32' : '#a88676',
+        knobLeft: on ? '19px' : '3px',
+        togglePublish: () => {
+          const n = Object.assign({}, (this.state && this.state.published) || {});
+          n[s.id] = !n[s.id];
+          this.setState({ published: n });
+        }
+      };
+    });
+
+    const d = st.draft;
+    let draft = { paper: '#fffaf4', fg: '#3a2620', rule: '#e8d5c6', family: P[0].family, size: '15px', excerpt: '', meta: '' };
+    if (d) {
+      const dt = T[d.paper || 0] || T[0];
+      const dp = P[d.pen || 0] || P[0];
+      let when = '';
+      try {
+        const x = new Date(d.savedAt);
+        if (!isNaN(x.getTime())) when = ' · SALVO ÀS ' + String(x.getHours()).padStart(2, '0') + ':' + String(x.getMinutes()).padStart(2, '0');
+      } catch (e) {}
+      draft = {
+        paper: dt.bg, fg: dt.fg, rule: dt.rule, family: dp.family,
+        size: (d.pen || 0) === 0 ? '14px' : '21px',
+        excerpt: String(d.text).slice(0, 220) + (String(d.text).length > 220 ? '…' : ''),
+        meta: 'RASCUNHO · DE ' + String(d.city || 'São Paulo').toUpperCase() + when
+      };
+    }
+
+    const TABS = ['Recebidas', 'Enviadas', 'Rascunhos'];
+    const keptNow = !!kept[cur.id];
+    return {
+      greeting: unopened === 0 ? 'Tudo lido. Mais uma chega amanhã.' : (unopened === 1 ? 'Uma carta fechada te esperando.' : unopened + ' cartas fechadas te esperando.'),
+      tabs: TABS.map((name, i) => ({
+        name, selected: i === tab ? 'true' : 'false',
+        bg: i === tab ? '#fffaf4' : 'transparent',
+        shadow: i === tab ? '0 1px 2px rgba(58,38,32,0.12)' : 'none',
+        pick: () => { this.setState({ tab: i }); if (i === 2) this.loadDraft(); }
+      })),
+      isInbox: tab === 0, isSent: tab === 1, isDrafts: tab === 2,
+      inbox,
+      reading: !!st.reading,
+      letter: {
+        aria: 'Carta de ' + cur.city,
+        paper: ct.bg, fg: ct.fg, muted: ct.muted, rule: ct.rule, sig: ct.sig,
+        postmark: (cur.city + ' · ' + cur.hour).toUpperCase(),
+        date: cur.date, stamp: cur.stamp,
+        family: cp.family, size: cp.size,
+        text: cur.text,
+        signature: '— alguém de ' + cur.city
+      },
+      closeLetter: () => this.setState({ reading: null }),
+      toggleKeep: () => {
+        const k = Object.assign({}, (this.state && this.state.kept) || {});
+        k[cur.id] = !k[cur.id];
+        this.setState({ kept: k });
+      },
+      keepPressed: keptNow ? 'true' : 'false',
+      keepLabel: keptNow ? 'Guardada' : 'Guardar com carinho',
+      keepBg: keptNow ? '#fbf3ea' : 'transparent',
+      keepFg: keptNow ? '#c23b32' : '#fbf3ea',
+      keepFill: keptNow ? 'currentColor' : 'none',
+      sent,
+      hasDraft: !!d,
+      noDraft: !d,
+      draft,
+      discardDraft: () => {
+        try { window.localStorage.removeItem('letterclub:rascunho'); } catch (e) {}
+        this.setState({ draft: null });
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

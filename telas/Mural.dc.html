@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>letterclub — mural</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Work+Sans:wght@400;500&amp;family=IBM+Plex+Mono:wght@500&amp;family=Homemade+Apple&amp;family=La+Belle+Aurore&amp;family=Caveat:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#fbf3ea}
+a{color:#c23b32}a:hover{color:#3a2620}
+:focus-visible{outline:2px solid #3a2620;outline-offset:2px}
+.lc-card{transition:transform 300ms ease-out, box-shadow 300ms ease-out}
+.lc-card:hover{transform:translateY(-2px) rotate(0deg) !important;box-shadow:0 2px 4px rgba(58,38,32,0.10), 0 18px 40px rgba(194,59,50,0.16) !important}
+@keyframes lc-rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes lc-fade{from{opacity:0}to{opacity:1}}
+@keyframes lc-pop{0%{transform:scale(1)}40%{transform:scale(1.28)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion: reduce){
+*{animation-duration:1ms !important;animation-iteration-count:1 !important;animation-delay:0ms !important;transition:none !important}
+}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #fbf3ea; color: #3a2620; font-family: 'Work Sans', 'Helvetica Neue', Arial, sans-serif;">
+
+<header style="max-width: 1360px; margin: 0 auto; box-sizing: border-box; padding: 28px 5%; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;">
+<a href="Main.dc.html" style="font-family: 'Instrument Serif', Georgia, serif; font-size: 34px; line-height: 1; text-decoration: none; color: #c23b32;">letterclub</a>
+<nav aria-label="Principal" style="display: flex; flex-wrap: wrap; align-items: center; gap: 28px; font-size: 14px; line-height: 20px; font-weight: 500;">
+<a href="Main.dc.html" style="text-decoration: none; padding: 12px 0; color: #3a2620;">início</a>
+<a href="Cartas.dc.html" style="text-decoration: none; padding: 12px 0; color: #3a2620;">cartas</a>
+<a href="Mural.dc.html" aria-current="page" style="text-decoration: underline; text-underline-offset: 6px; padding: 12px 0; color: #c23b32;">mural</a>
+<a href="Clube.dc.html" style="text-decoration: none; padding: 12px 0; color: #3a2620;">o clube</a>
+<a href="Caixa.dc.html" style="text-decoration: none; padding: 12px 0; color: #3a2620;">sua caixa</a>
+<a href="Escrever.dc.html" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 22px; border-radius: 999px; background: #c23b32; color: #ffffff; text-decoration: none;">Escrever uma carta</a>
+</nav>
+</header>
+
+<main style="max-width: 1360px; margin: 0 auto; box-sizing: border-box; padding: 16px 5% 96px; display: flex; flex-direction: column; gap: 40px;">
+<div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px; animation: lc-rise 700ms cubic-bezier(.22,.61,.36,1) both;">
+<div style="display: flex; flex-direction: column; gap: 12px; max-width: 640px;">
+<p style="margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500; color: #c23b32;">O MURAL</p>
+<h1 style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: clamp(48px, 5vw, 72px); line-height: 1; letter-spacing: -0.02em;">Cartas que alguém <em style="font-style: italic; color: #c23b32;">quis</em> deixar à vista.</h1>
+<p style="margin: 0; font-size: 17px; line-height: 27px; color: #7a5a4e;">Todas chegaram na caixa de alguém primeiro. Depois, quem escreveu decidiu pendurar aqui.</p>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px;">
+<div role="group" aria-label="Ordem das cartas" style="display: inline-flex; padding: 4px; border-radius: 999px; background: #f6d9cf; gap: 4px;">
+<sc-for list="{{sorts}}" as="s" hint-placeholder-count="3">
+<button type="button" onClick="{{s.pick}}" aria-pressed="{{s.selected}}" style="min-height: 40px; padding: 0 16px; border-radius: 999px; border: 0; background: {{s.bg}}; color: #3a2620; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer; box-shadow: {{s.shadow}};">{{s.name}}</button>
+</sc-for>
+</div>
+<button type="button" onClick="{{toggleOnlyFavs}}" aria-pressed="{{onlyFavsPressed}}" style="min-height: 48px; padding: 0 18px; border-radius: 999px; border: 1.5px solid {{onlyFavsBorder}}; background: {{onlyFavsBg}}; color: {{onlyFavsFg}}; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="{{onlyFavsHeart}}" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg>
+só minhas favoritas
+</button>
+</div>
+</div>
+
+<sc-if value="{{isEmpty}}" hint-placeholder-val="{{ false }}">
+<div style="padding: 96px 24px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center;">
+<p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 30px; line-height: 36px;">Nenhuma favorita. Por enquanto.</p>
+<p style="margin: 0; font-size: 17px; line-height: 27px; color: #7a5a4e;">Toque no coração de uma carta pra guardar ela aqui.</p>
+</div>
+</sc-if>
+
+<div style="columns: 3 300px; column-gap: 28px;">
+<sc-for list="{{letters}}" as="l" hint-placeholder-count="12">
+<article class="lc-card" aria-label="{{l.aria}}" style="break-inside: avoid; margin: 0 0 28px; box-sizing: border-box; padding: 28px 28px 16px; border-radius: 10px; background: {{l.bg}}; color: {{l.fg}}; box-shadow: 0 1px 2px rgba(58,38,32,0.08), 0 10px 28px rgba(58,38,32,0.10); display: flex; flex-direction: column; gap: 14px; transform: rotate({{l.tilt}}); animation: lc-rise 600ms cubic-bezier(.22,.61,.36,1) {{l.delay}} both;">
+<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;">
+<div style="display: flex; flex-direction: column; gap: 2px;">
+<p style="margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500; color: {{l.muted}};">{{l.postmark}}</p>
+<p style="margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500; color: {{l.muted}};">{{l.date}}</p>
+</div>
+<div style="flex: 0 0 auto;"><dc-import name="Selo" kind="{{l.stamp}}" hint-size="56px,50px"></dc-import></div>
+</div>
+<p style="margin: 0; font-family: {{l.family}}; font-size: {{l.size}}; line-height: 36px; background-image: repeating-linear-gradient(to bottom, transparent 0px, transparent 35px, {{l.rule}} 35px, {{l.rule}} 36px);">{{l.text}}</p>
+<p style="margin: 0; font-family: 'Homemade Apple', 'Segoe Script', cursive; font-size: 18px; line-height: 36px; color: {{l.sig}};">{{l.signature}}</p>
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 -10px; padding-top: 6px; border-top: 1px solid {{l.rule}};">
+<button type="button" onClick="{{l.fav}}" aria-pressed="{{l.favPressed}}" aria-label="{{l.favLabel}}" style="width: 44px; height: 44px; border: 0; border-radius: 999px; background: transparent; color: {{l.fg}}; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
+<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="{{l.heartFill}}" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" style="animation: {{l.heartAnim}};"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg>
+</button>
+<button type="button" onClick="{{l.share}}" style="min-height: 44px; padding: 0 12px; border: 0; border-radius: 999px; background: transparent; color: {{l.fg}}; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"></path></svg>
+Compartilhar
+</button>
+</div>
+</article>
+</sc-for>
+</div>
+</main>
+
+<sc-if value="{{sharing}}" hint-placeholder-val="{{ false }}">
+<div style="position: fixed; inset: 0; z-index: 40; background: rgba(31,23,21,0.62); display: flex; align-items: center; justify-content: center; padding: 24px; box-sizing: border-box; overflow-y: auto; animation: lc-fade 240ms ease-out both;">
+<div role="dialog" aria-modal="true" aria-labelledby="share-titulo" style="position: relative; width: 100%; max-width: 920px; box-sizing: border-box; padding: 40px; border-radius: 24px; background: #fbf3ea; color: #3a2620; box-shadow: 0 2px 4px rgba(0,0,0,0.2), 0 30px 60px rgba(0,0,0,0.3); display: flex; flex-wrap: wrap; align-items: center; gap: 40px; animation: lc-rise 400ms cubic-bezier(.22,.61,.36,1) both;">
+<button type="button" onClick="{{closeShare}}" aria-label="Fechar" style="position: absolute; top: 16px; right: 16px; width: 44px; height: 44px; border-radius: 999px; border: 0; background: transparent; color: #3a2620; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
+<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+</button>
+
+<div style="flex: 0 0 auto; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+<div aria-label="Prévia da imagem para o Instagram" role="img" style="box-sizing: border-box; width: {{frame.w}}; height: {{frame.h}}; border-radius: 16px; background: {{shareBg.bg}}; color: {{shareBg.fg}}; padding: 28px 22px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 16px; box-shadow: 0 10px 28px rgba(58,38,32,0.18); transition: width 300ms ease-out, height 300ms ease-out, background-color 300ms ease-out;">
+<p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 26px; line-height: 1; letter-spacing: -0.01em;">letterclub</p>
+<div style="box-sizing: border-box; width: 100%; padding: 18px 18px 10px; border-radius: 8px; background: {{sl.bg}}; color: {{sl.fg}}; box-shadow: 0 6px 18px rgba(31,23,21,0.22); transform: rotate(-2deg); display: flex; flex-direction: column; gap: 8px;">
+<p style="margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 9px; line-height: 12px; letter-spacing: 0.14em; font-weight: 500; color: {{sl.muted}};">{{sl.postmark}}</p>
+<p style="margin: 0; font-family: {{sl.family}}; font-size: {{sl.smallSize}}; line-height: 27px; background-image: repeating-linear-gradient(to bottom, transparent 0px, transparent 26px, {{sl.rule}} 26px, {{sl.rule}} 27px);">{{sl.text}}</p>
+<p style="margin: 0; font-family: 'Homemade Apple', 'Segoe Script', cursive; font-size: 13px; line-height: 27px; color: {{sl.sig}};">{{sl.signature}}</p>
+</div>
+<p style="margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 9px; line-height: 12px; letter-spacing: 0.14em; font-weight: 500; text-align: center;">ESCREVA A SUA NO LETTERCLUB</p>
+</div>
+<p style="margin: 0; font-size: 13px; line-height: 18px; color: #7a5a4e;">{{frame.label}}</p>
+</div>
+
+<div style="flex: 1 1 340px; min-width: 0; display: flex; flex-direction: column; gap: 24px;">
+<div style="display: flex; flex-direction: column; gap: 8px;">
+<h2 id="share-titulo" style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 44px; line-height: 48px;">Compartilhar carta</h2>
+<p style="margin: 0; font-size: 17px; line-height: 27px; color: #7a5a4e;">A carta vira uma imagem, do jeitinho que foi escrita. Sem nome — só a cidade e a hora.</p>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px;">
+<p style="margin: 0; font-size: 14px; line-height: 20px; font-weight: 500;">Formato</p>
+<div role="group" aria-label="Formato da imagem" style="display: inline-flex; align-self: flex-start; padding: 4px; border-radius: 999px; background: #f6d9cf; gap: 4px;">
+<sc-for list="{{formats}}" as="f" hint-placeholder-count="2">
+<button type="button" onClick="{{f.pick}}" aria-pressed="{{f.selected}}" style="min-height: 40px; padding: 0 18px; border-radius: 999px; border: 0; background: {{f.bg}}; color: #3a2620; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer; box-shadow: {{f.shadow}};">{{f.name}}</button>
+</sc-for>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px;">
+<p style="margin: 0; font-size: 14px; line-height: 20px; font-weight: 500;">Fundo</p>
+<div style="display: flex; align-items: center; gap: 4px;">
+<sc-for list="{{bgs}}" as="b" hint-placeholder-count="3">
+<button type="button" onClick="{{b.pick}}" aria-pressed="{{b.selected}}" aria-label="{{b.label}}" style="width: 48px; height: 48px; padding: 0; border: 0; background: transparent; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
+<span style="display: block; width: 34px; height: 34px; border-radius: 50%; background: {{b.bg}}; box-shadow: {{b.ring}};"></span>
+</button>
+</sc-for>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px;">
+<button type="button" onClick="{{shareInstagram}}" style="min-height: 52px; padding: 0 24px; border-radius: 999px; border: 0; background: #c23b32; color: #ffffff; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 10px;">
+<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="3.2 2.2"><circle cx="12" cy="12" r="9"></circle></svg>
+{{instagramLabel}}
+</button>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px;">
+<button type="button" onClick="{{download}}" style="min-height: 48px; padding: 0 12px; border-radius: 999px; border: 1.5px solid #a88676; background: #fffaf4; color: #3a2620; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer;">Baixar imagem</button>
+<button type="button" onClick="{{whatsapp}}" style="min-height: 48px; padding: 0 12px; border-radius: 999px; border: 1.5px solid #a88676; background: #fffaf4; color: #3a2620; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer;">WhatsApp</button>
+<button type="button" onClick="{{copyLink}}" style="min-height: 48px; padding: 0 12px; border-radius: 999px; border: 1.5px solid #a88676; background: #fffaf4; color: #3a2620; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer;">Copiar link</button>
+</div>
+</div>
+<p role="status" style="margin: 0; min-height: 18px; font-size: 13px; line-height: 18px; color: #3f6b57;">{{toast}}</p>
+</div>
+</div>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1600}}'>
+class Component extends DCLogic {
+  state = { favs: {}, popped: null, sort: 0, onlyFavs: false, shareId: null, format: 0, bg: 0, toast: '' };
+  componentWillUnmount() { clearTimeout(this.toastTimer); }
+  say(msg) {
+    clearTimeout(this.toastTimer);
+    this.setState({ toast: msg });
+    this.toastTimer = setTimeout(() => this.setState({ toast: '' }), 3200);
+  }
+  data() {
+    const P = {
+      cursiva: { family: "'Homemade Apple', 'Segoe Script', cursive", size: '18px', small: '13px' },
+      fina: { family: "'La Belle Aurore', 'Segoe Script', cursive", size: '26px', small: '19px' },
+      forma: { family: "'Caveat', 'Segoe Print', cursive", size: '25px', small: '19px' }
+    };
+    const T = {
+      papel: { bg: '#fffaf4', fg: '#3a2620', muted: '#7a5a4e', rule: '#e8d5c6', sig: '#c23b32' },
+      coral: { bg: '#c23b32', fg: '#ffffff', muted: '#ffffff', rule: 'rgba(255,255,255,0.28)', sig: '#ffffff' },
+      ocre: { bg: '#d9a441', fg: '#3a2620', muted: '#3a2620', rule: 'rgba(58,38,32,0.2)', sig: '#3a2620' },
+      salvia: { bg: '#3f6b57', fg: '#fbf3ea', muted: '#fbf3ea', rule: 'rgba(251,243,234,0.24)', sig: '#fbf3ea' },
+      pessego: { bg: '#f2b8a2', fg: '#3a2620', muted: '#3a2620', rule: 'rgba(58,38,32,0.18)', sig: '#3a2620' },
+      blush: { bg: '#f6d9cf', fg: '#3a2620', muted: '#7a5a4e', rule: 'rgba(58,38,32,0.16)', sig: '#3a2620' }
+    };
+    const S = { a1: 'cidade', a2: 'sol', a3: 'cha', a4: 'chuva', a5: 'lua', a6: 'pao', a7: 'mar', a8: 'frio', a9: 'riso', a10: 'rio', a11: 'estrela', a12: 'ponte' };
+    return this.withStamps(S, [
+      { id: 'a1', order: 1, saves: 41, city: 'São Paulo', hour: '23h', date: '05 NOV 2026', pen: P.cursiva, tone: T.papel, text: 'Querida pessoa que eu não conheço, hoje a cidade estava barulhenta demais e eu pensei em você, que talvez também precise de um pouco de silêncio.' },
+      { id: 'a2', order: 2, saves: 88, city: 'Recife', hour: '6h', date: '04 NOV 2026', pen: P.fina, tone: T.coral, text: 'Acordei antes do sol só pra te contar: o mar continua aqui. Ele espera sem pressa nenhuma.' },
+      { id: 'a3', order: 3, saves: 63, city: 'Porto Alegre', hour: '19h', date: '04 NOV 2026', pen: P.forma, tone: T.ocre, text: 'Não sei seu nome, mas sei que você chegou até o fim de mais um dia. Isso já é muita coisa. Toma um chá por mim.' },
+      { id: 'a4', order: 4, saves: 22, city: 'Belém', hour: '14h', date: '03 NOV 2026', pen: P.cursiva, tone: T.salvia, text: 'Choveu às duas, como sempre. Aprendi que dá pra marcar encontro com a chuva. Talvez dê com você também.' },
+      { id: 'a5', order: 5, saves: 97, city: 'Lisboa', hour: '2h', date: '03 NOV 2026', pen: P.fina, tone: T.pessego, text: 'Escrevo de longe, com a janela aberta. Se você estiver triste, saiba que alguém acordado pensou em você.' },
+      { id: 'a6', order: 6, saves: 54, city: 'Belo Horizonte', hour: '17h', date: '02 NOV 2026', pen: P.forma, tone: T.blush, text: 'Hoje aprendi a fazer pão. Ficou feio e muito gostoso. Acho que a maioria das coisas boas é assim.' },
+      { id: 'a7', order: 7, saves: 30, city: 'Salvador', hour: '10h', date: '02 NOV 2026', pen: P.forma, tone: T.papel, text: 'Passei na frente do mar e lembrei que nem tudo precisa ser resolvido hoje. Nem por você.' },
+      { id: 'a8', order: 8, saves: 71, city: 'Curitiba', hour: '7h', date: '01 NOV 2026', pen: P.fina, tone: T.salvia, text: 'Faz frio aqui. Se fizer frio aí também, imagina que eu te emprestei um casaco.' },
+      { id: 'a9', order: 9, saves: 45, city: 'Rio de Janeiro', hour: '21h', date: '01 NOV 2026', pen: P.cursiva, tone: T.ocre, text: 'Ri sozinha no ônibus lembrando de uma bobagem. Espero que você ria de alguma coisa hoje.' },
+      { id: 'a10', order: 10, saves: 19, city: 'Manaus', hour: '16h', date: '31 OUT 2026', pen: P.fina, tone: T.blush, text: 'O rio aqui é tão grande que parece mar. Às vezes a gente também é maior do que pensa.' },
+      { id: 'a11', order: 11, saves: 66, city: 'Fortaleza', hour: '5h', date: '30 OUT 2026', pen: P.forma, tone: T.coral, text: 'Não consegui dormir, então decidi escrever pra alguém. Oi. Obrigada por ler até aqui.' },
+      { id: 'a12', order: 12, saves: 38, city: 'Florianópolis', hour: '12h', date: '30 OUT 2026', pen: P.cursiva, tone: T.pessego, text: 'Almocei olhando a ponte e pensei: tem gente do outro lado de tudo. Inclusive você.' }
+    ]);
+  }
+  withStamps(map, list) {
+    return list.map((l) => Object.assign({}, l, { stamp: map[l.id] || 'sol' }));
+  }
+  renderVals() {
+    const st = this.state || {};
+    const favs = st.favs || {};
+    const all = this.data();
+    const SORTS = ['mais recentes', 'mais antigas', 'mais guardadas'];
+    const sort = st.sort || 0;
+    let list = all.slice();
+    if (sort === 0) list.sort((a, b) => a.order - b.order);
+    if (sort === 1) list.sort((a, b) => b.order - a.order);
+    if (sort === 2) list.sort((a, b) => (b.saves + (favs[b.id] ? 1 : 0)) - (a.saves + (favs[a.id] ? 1 : 0)));
+    if (st.onlyFavs) list = list.filter((l) => favs[l.id]);
+    const tilts = ['-0.6deg', '0.5deg', '-0.3deg', '0.7deg', '0deg', '-0.5deg'];
+    const letters = list.map((l, i) => {
+      const on = !!favs[l.id];
+      return {
+        stamp: l.stamp,
+        aria: 'Carta de ' + l.city + ', ' + l.date,
+        postmark: (l.city + ' · ' + l.hour).toUpperCase(),
+        date: l.date,
+        text: l.text,
+        signature: '— alguém de ' + l.city,
+        family: l.pen.family, size: l.pen.size,
+        bg: l.tone.bg, fg: l.tone.fg, muted: l.tone.muted, rule: l.tone.rule, sig: l.tone.sig,
+        tilt: tilts[i % tilts.length],
+        delay: (Math.min(i, 8) * 60) + 'ms',
+        favPressed: on ? 'true' : 'false',
+        favLabel: on ? 'Tirar dos favoritos' : 'Favoritar carta de ' + l.city,
+        heartFill: on ? 'currentColor' : 'none',
+        heartAnim: st.popped === l.id ? 'lc-pop 400ms ease-out' : 'none',
+        fav: () => {
+          const next = Object.assign({}, (this.state && this.state.favs) || {});
+          if (next[l.id]) delete next[l.id]; else next[l.id] = true;
+          this.setState({ favs: next, popped: next[l.id] ? l.id : null });
+        },
+        share: () => this.setState({ shareId: l.id, toast: '' })
+      };
+    });
+    const shared = all.find((l) => l.id === st.shareId) || all[0];
+    const FORMATS = [
+      { name: 'Stories 9:16', w: '270px', h: '480px', label: 'Stories · 1080 × 1920' },
+      { name: 'Feed 4:5', w: '300px', h: '375px', label: 'Feed · 1080 × 1350' }
+    ];
+    const BGS = [
+      { label: 'Fundo vermelho', bg: '#c23b32', fg: '#ffffff' },
+      { label: 'Fundo creme', bg: '#fbf3ea', fg: '#3a2620' },
+      { label: 'Fundo ocre', bg: '#d9a441', fg: '#3a2620' }
+    ];
+    const fmt = st.format || 0;
+    const bgi = st.bg || 0;
+    const favCount = Object.keys(favs).length;
+    return {
+      sorts: SORTS.map((name, i) => ({
+        name, selected: i === sort ? 'true' : 'false',
+        bg: i === sort ? '#fffaf4' : 'transparent',
+        shadow: i === sort ? '0 1px 2px rgba(58,38,32,0.12)' : 'none',
+        pick: () => this.setState({ sort: i })
+      })),
+      toggleOnlyFavs: () => this.setState({ onlyFavs: !(this.state && this.state.onlyFavs) }),
+      onlyFavsPressed: st.onlyFavs ? 'true' : 'false',
+      onlyFavsBg: st.onlyFavs ? '#c23b32' : 'transparent',
+      onlyFavsFg: st.onlyFavs ? '#ffffff' : '#3a2620',
+      onlyFavsBorder: st.onlyFavs ? '#c23b32' : '#a88676',
+      onlyFavsHeart: st.onlyFavs ? 'currentColor' : 'none',
+      isEmpty: !!st.onlyFavs && favCount === 0,
+      letters,
+      sharing: !!st.shareId,
+      closeShare: () => this.setState({ shareId: null, toast: '' }),
+      sl: {
+        bg: shared.tone.bg, fg: shared.tone.fg, muted: shared.tone.muted, rule: shared.tone.rule, sig: shared.tone.sig,
+        family: shared.pen.family, smallSize: shared.pen.small,
+        postmark: (shared.city + ' · ' + shared.hour + ' · ' + shared.date).toUpperCase(),
+        text: shared.text,
+        signature: '— alguém de ' + shared.city
+      },
+      frame: FORMATS[fmt],
+      formats: FORMATS.map((f, i) => ({
+        name: f.name, selected: i === fmt ? 'true' : 'false',
+        bg: i === fmt ? '#fffaf4' : 'transparent',
+        shadow: i === fmt ? '0 1px 2px rgba(58,38,32,0.12)' : 'none',
+        pick: () => this.setState({ format: i })
+      })),
+      shareBg: BGS[bgi],
+      bgs: BGS.map((b, i) => ({
+        label: b.label, bg: b.bg, selected: i === bgi ? 'true' : 'false',
+        ring: i === bgi ? '0 0 0 2px #fbf3ea, 0 0 0 4px #3a2620' : 'inset 0 0 0 1px rgba(58,38,32,0.18)',
+        pick: () => this.setState({ bg: i })
+      })),
+      instagramLabel: fmt === 0 ? 'Compartilhar nos Stories' : 'Compartilhar no feed do Instagram',
+      shareInstagram: () => this.say(fmt === 0 ? 'Imagem pronta. No celular, o Instagram abre direto nos Stories.' : 'Imagem pronta. No celular, o Instagram abre pra você postar no feed.'),
+      download: () => this.say('Imagem salva. É só postar onde quiser.'),
+      whatsapp: () => this.say('Abrindo o WhatsApp com a imagem e o link da carta.'),
+      copyLink: () => {
+        try { if (navigator.clipboard) navigator.clipboard.writeText('letterclub/carta/' + shared.id); } catch (e) {}
+        this.say('Link copiado.');
+      },
+      toast: st.toast || ''
+    };
+  }
+}
+</script>
+</body>
+</html>

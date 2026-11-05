@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>letterclub — selo</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div aria-hidden="true" style="box-sizing: border-box; width: {{s.w}}; height: {{s.h}}; padding: 3px; border-radius: {{s.radius}}; background: {{s.bg}}; transform: rotate({{s.tilt}}); box-shadow: 0 1px 2px rgba(58,38,32,0.18); font-family: 'IBM Plex Mono', Menlo, monospace; color: {{s.ink}};">
+<div style="box-sizing: border-box; width: 100%; height: 100%; border: 1.5px dashed {{s.edge}}; border-radius: {{s.innerRadius}}; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;">
+<svg width="{{s.icon}}" height="{{s.icon}}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="{{s.d}}"></path></svg>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"kind":{"editor":"enum","default":"sol","options":["cidade","sol","cha","chuva","lua","pao","mar","frio","riso","rio","estrela","ponte"]},"$preview":{"width":64,"height":64}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const C = { ink: '#3a2620', paper: '#fffaf4', blush: '#f6d9cf', peach: '#f2b8a2', coral: '#c23b32', ochre: '#d9a441', sage: '#3f6b57' };
+    const SHAPES = {
+      tall: { w: '42px', h: '50px', radius: '4px', innerRadius: '2px', icon: 24 },
+      square: { w: '46px', h: '46px', radius: '4px', innerRadius: '2px', icon: 24 },
+      round: { w: '50px', h: '50px', radius: '50%', innerRadius: '50%', icon: 22 },
+      wide: { w: '56px', h: '42px', radius: '4px', innerRadius: '2px', icon: 22 }
+    };
+    const K = {
+      cidade: { label: 'CIDADE', shape: 'tall', tilt: '4deg', bg: C.ink, edge: C.ochre, ink: C.ochre,
+        d: 'M4 21V9h6v12 M10 21V4h7v17 M17 21v-9h3v9 M3 21h18 M6.5 12h1 M6.5 15h1 M13 7.5h1 M13 11h1 M13 14.5h1' },
+      sol: { label: 'SOL', shape: 'round', tilt: '-6deg', bg: C.ochre, edge: C.paper, ink: C.coral,
+        d: 'M3 18h18 M7 18a5 5 0 0 1 10 0 M12 8v2 M5.6 11.6l1.4 1.4 M18.4 11.6L17 13 M3.5 15h1.5 M19 15h1.5' },
+      cha: { label: 'CHÁ', shape: 'square', tilt: '3deg', bg: C.sage, edge: C.paper, ink: C.paper,
+        d: 'M5 10h11v4a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5z M16 11.5h1.5a2.5 2.5 0 0 1 0 5H16 M9 3.5c-1 1.2 1 2 0 3.5 M12.5 3.5c-1 1.2 1 2 0 3.5' },
+      chuva: { label: 'CHUVA', shape: 'wide', tilt: '-3deg', bg: C.blush, edge: C.ochre, ink: C.sage,
+        d: 'M7 14a4 4 0 0 1 .5-8 5 5 0 0 1 9.5 1.5 3.3 3.3 0 0 1-.5 6.5z M8.5 17l-1 3 M12.5 17l-1 3 M16.5 17l-1 3' },
+      lua: { label: 'LUA', shape: 'tall', tilt: '-5deg', bg: C.coral, edge: C.blush, ink: '#ffffff',
+        d: 'M18 15A7 7 0 1 1 9 6a5.5 5.5 0 0 0 9 9z M18 3.5v3 M16.5 5h3' },
+      pao: { label: 'PÃO', shape: 'round', tilt: '5deg', bg: C.ochre, edge: C.coral, ink: C.ink,
+        d: 'M4 13a8 5.5 0 0 1 16 0v4a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z M8.5 9.5l1.5 3 M12 8.8l1.5 3 M15.5 9.5l1.2 2.4' },
+      mar: { label: 'MAR', shape: 'wide', tilt: '2deg', bg: C.peach, edge: C.coral, ink: C.coral,
+        d: 'M2 9c2.5-2 5-2 7.5 0s5 2 7.5 0 3.5-1.5 5-1 M2 14c2.5-2 5-2 7.5 0s5 2 7.5 0 3.5-1.5 5-1 M2 19c2.5-2 5-2 7.5 0s5 2 7.5 0 3.5-1.5 5-1' },
+      frio: { label: 'FRIO', shape: 'square', tilt: '-4deg', bg: C.paper, edge: C.sage, ink: C.sage,
+        d: 'M12 3v18 M4.2 7.5l15.6 9 M4.2 16.5l15.6-9 M9.5 4.5L12 7l2.5-2.5 M9.5 19.5L12 17l2.5 2.5' },
+      riso: { label: 'RISO', shape: 'round', tilt: '-2deg', bg: C.coral, edge: C.paper, ink: '#ffffff',
+        d: 'M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z' },
+      rio: { label: 'RIO', shape: 'tall', tilt: '6deg', bg: C.sage, edge: C.ochre, ink: C.paper,
+        d: 'M5 19c0-8 6-14 14-14 0 8-6 14-14 14z M5 19l8-8 M10 14h3.5 M12.5 11.5V8' },
+      estrela: { label: 'ESTRELA', shape: 'square', tilt: '4deg', bg: C.ink, edge: C.ochre, ink: C.ochre,
+        d: 'M12 3.5l2.5 5.3 5.8.7-4.3 4 1.2 5.8L12 16.4l-5.2 2.9 1.2-5.8-4.3-4 5.8-.7z' },
+      ponte: { label: 'PONTE', shape: 'wide', tilt: '-5deg', bg: C.blush, edge: C.coral, ink: C.coral,
+        d: 'M2 17h20 M4 17V8 M20 17V8 M4 8c4 5.5 12 5.5 16 0 M8 11.6V17 M12 12.4V17 M16 11.6V17' }
+    };
+    const k = K[this.props.kind] || K.sol;
+    const sh = SHAPES[k.shape];
+    return { s: Object.assign({}, sh, k, { icon: String(sh.icon) }) };
+  }
+}
+</script>
+</body>
+</html>

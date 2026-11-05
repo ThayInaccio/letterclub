@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>letterclub — mandar pelo correio</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Work+Sans:wght@400;500&amp;family=IBM+Plex+Mono:wght@500&amp;family=Homemade+Apple&amp;family=La+Belle+Aurore&amp;family=Caveat:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#fbf3ea}
+a{color:#c23b32}a:hover{color:#3a2620}
+:focus-visible{outline:2px solid #3a2620;outline-offset:2px}
+input::placeholder{color:#7a5a4e;opacity:1}
+@keyframes lc-rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){
+*{animation-duration:1ms !important;animation-delay:0ms !important;transition:none !important}
+}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #fbf3ea; color: #3a2620; font-family: 'Work Sans', 'Helvetica Neue', Arial, sans-serif;">
+
+<header style="max-width: 1360px; margin: 0 auto; box-sizing: border-box; padding: 28px 5%; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;">
+<a href="Main.dc.html" style="font-family: 'Instrument Serif', Georgia, serif; font-size: 34px; line-height: 1; text-decoration: none; color: #c23b32;">letterclub</a>
+<a href="Escrever.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 14px; line-height: 20px; font-weight: 500; color: #3a2620; text-decoration: none;">
+<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>
+Voltar pra carta
+</a>
+</header>
+
+<main style="max-width: 1360px; margin: 0 auto; box-sizing: border-box; padding: 8px 5% 96px; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 48px;">
+
+<section aria-labelledby="correio-titulo" style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 36px;">
+<div style="display: flex; flex-direction: column; gap: 12px; animation: lc-rise 600ms ease-out both;">
+<p style="margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500; color: #c23b32;">PELO CORREIO, DE VERDADE</p>
+<h1 id="correio-titulo" style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: clamp(44px, 4.6vw, 64px); line-height: 1; letter-spacing: -0.02em;">Uma carta que dá pra <em style="font-style: italic; color: #c23b32;">segurar</em>.</h1>
+<p style="margin: 0; max-width: 560px; font-size: 17px; line-height: 27px; color: #7a5a4e;">A gente imprime (ou escreve à mão), fecha o envelope, cola o selo e leva até o correio. Você só escolhe os detalhes.</p>
+</div>
+
+<ol aria-label="Etapas" style="margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 8px;">
+<sc-for list="{{steps}}" as="s" hint-placeholder-count="3">
+<li>
+<button type="button" onClick="{{s.go}}" aria-current="{{s.current}}" style="min-height: 44px; padding: 0 18px 0 8px; border-radius: 999px; border: 1.5px solid {{s.border}}; background: {{s.bg}}; color: {{s.fg}}; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 10px;">
+<span style="width: 28px; height: 28px; border-radius: 50%; background: {{s.dotBg}}; color: {{s.dotFg}}; display: inline-flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px;">{{s.num}}</span>
+{{s.name}}
+</button>
+</li>
+</sc-for>
+</ol>
+
+<sc-if value="{{isStep0}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 32px; animation: lc-rise 400ms ease-out both;">
+<fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 12px;">
+<legend style="padding: 0; margin-bottom: 12px; font-family: 'Instrument Serif', Georgia, serif; font-size: 30px; line-height: 36px;">Como ela vai pro papel</legend>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px;">
+<sc-for list="{{methods}}" as="o" hint-placeholder-count="2">
+<button type="button" onClick="{{o.pick}}" aria-pressed="{{o.selected}}" style="text-align: left; min-height: 120px; padding: 20px; border-radius: 10px; border: {{o.border}}; background: {{o.bg}}; color: #3a2620; font-family: inherit; cursor: pointer; display: flex; flex-direction: column; gap: 8px;">
+<span style="display: flex; justify-content: space-between; gap: 12px; align-items: baseline;"><span style="font-size: 17px; line-height: 24px; font-weight: 500;">{{o.name}}</span><span style="font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; line-height: 16px; letter-spacing: 0.06em; color: #7a5a4e; white-space: nowrap;">{{o.priceLabel}}</span></span>
+<span style="font-size: 15px; line-height: 22px; color: #7a5a4e;">{{o.desc}}</span>
+<span style="font-family: {{o.sampleFont}}; font-size: {{o.sampleSize}}; line-height: 36px; color: #3a2620;">{{o.sample}}</span>
+</button>
+</sc-for>
+</div>
+</fieldset>
+
+<fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 12px;">
+<legend style="padding: 0; margin-bottom: 12px; font-family: 'Instrument Serif', Georgia, serif; font-size: 30px; line-height: 36px;">Papel</legend>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+<sc-for list="{{papers}}" as="o" hint-placeholder-count="3">
+<button type="button" onClick="{{o.pick}}" aria-pressed="{{o.selected}}" style="text-align: left; padding: 14px; border-radius: 10px; border: {{o.border}}; background: #fffaf4; color: #3a2620; font-family: inherit; cursor: pointer; display: flex; flex-direction: column; gap: 12px;">
+<span aria-hidden="true" style="display: block; height: 72px; border-radius: 6px; background-color: {{o.swatch}}; background-image: repeating-linear-gradient(to bottom, transparent 0px, transparent 13px, rgba(58,38,32,0.12) 13px, rgba(58,38,32,0.12) 14px); box-shadow: inset 0 0 0 1px rgba(58,38,32,0.12);"></span>
+<span style="display: flex; justify-content: space-between; gap: 8px; align-items: baseline;"><span style="font-size: 15px; line-height: 22px; font-weight: 500;">{{o.name}}</span><span style="font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; line-height: 16px; color: #7a5a4e; white-space: nowrap;">{{o.priceLabel}}</span></span>
+<span style="font-size: 13px; line-height: 18px; color: #7a5a4e;">{{o.desc}}</span>
+</button>
+</sc-for>
+</div>
+</fieldset>
+
+<fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 12px;">
+<legend style="padding: 0; margin-bottom: 12px; font-family: 'Instrument Serif', Georgia, serif; font-size: 30px; line-height: 36px;">Envelope</legend>
+<div style="display: flex; flex-wrap: wrap; gap: 12px;">
+<sc-for list="{{envelopes}}" as="o" hint-placeholder-count="4">
+<button type="button" onClick="{{o.pick}}" aria-pressed="{{o.selected}}" style="min-height: 52px; padding: 0 18px 0 8px; border-radius: 999px; border: {{o.border}}; background: #fffaf4; color: #3a2620; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 10px;">
+<span aria-hidden="true" style="width: 36px; height: 36px; border-radius: 50%; background: {{o.swatch}}; box-shadow: inset 0 0 0 1px rgba(58,38,32,0.15);"></span>
+{{o.name}}
+</button>
+</sc-for>
+</div>
+</fieldset>
+
+<fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 12px;">
+<legend style="padding: 0; margin-bottom: 12px; font-family: 'Instrument Serif', Georgia, serif; font-size: 30px; line-height: 36px;">Adicionais</legend>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px;">
+<sc-for list="{{extras}}" as="x" hint-placeholder-count="3">
+<button type="button" onClick="{{x.toggle}}" aria-pressed="{{x.selected}}" style="text-align: left; min-height: 88px; padding: 16px; border-radius: 10px; border: {{x.border}}; background: {{x.bg}}; color: #3a2620; font-family: inherit; cursor: pointer; display: flex; gap: 14px; align-items: flex-start;">
+<span aria-hidden="true" style="flex: 0 0 auto; width: 22px; height: 22px; margin-top: 1px; border-radius: 4px; border: 1.5px solid {{x.boxBorder}}; background: {{x.boxBg}}; color: #ffffff; display: inline-flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>
+<span style="display: flex; flex-direction: column; gap: 4px; flex: 1 1 auto;">
+<span style="display: flex; justify-content: space-between; gap: 8px; align-items: baseline;"><span style="font-size: 15px; line-height: 22px; font-weight: 500;">{{x.name}}</span><span style="font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; line-height: 16px; color: #7a5a4e; white-space: nowrap;">{{x.priceLabel}}</span></span>
+<span style="font-size: 13px; line-height: 18px; color: #7a5a4e;">{{x.desc}}</span>
+</span>
+</button>
+</sc-for>
+</div>
+
+<div style="padding: 20px; border-radius: 10px; background: #fffaf4; box-shadow: inset 0 0 0 1px #e8d5c6; display: flex; flex-direction: column; gap: 16px;">
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;">
+<div style="display: flex; flex-direction: column; gap: 2px;">
+<span style="font-size: 15px; line-height: 22px; font-weight: 500;">Fotos impressas</span>
+<span style="font-size: 13px; line-height: 18px; color: #7a5a4e;">Até 3, em papel fotográfico 10×15. {{photoPriceLabel}} cada.</span>
+</div>
+<div style="display: inline-flex; align-items: center; gap: 4px; padding: 4px; border-radius: 999px; box-shadow: inset 0 0 0 1.5px #a88676;">
+<button type="button" onClick="{{photoMinus}}" aria-label="Menos uma foto" style="width: 40px; height: 40px; border-radius: 999px; border: 0; background: transparent; color: #3a2620; cursor: pointer; font-size: 20px; line-height: 1;">−</button>
+<span aria-live="polite" style="min-width: 28px; text-align: center; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 15px;">{{photos}}</span>
+<button type="button" onClick="{{photoPlus}}" aria-label="Mais uma foto" style="width: 40px; height: 40px; border-radius: 999px; border: 0; background: transparent; color: #3a2620; cursor: pointer; font-size: 20px; line-height: 1;">+</button>
+</div>
+</div>
+<sc-if value="{{hasPhotos}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px;">
+<sc-for list="{{photoSlots}}" as="p" hint-placeholder-count="1">
+<div style="width: 72px; height: 96px; box-sizing: border-box; border-radius: 6px; border: 1.5px dashed #a88676; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; letter-spacing: 0.1em; color: #7a5a4e; transform: rotate({{p.tilt}});">{{p.label}}</div>
+</sc-for>
+<label style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1.5px solid #a88676; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer;">
+Escolher fotos
+<input type="file" accept="image/*" multiple style="position: absolute; width: 1px; height: 1px; opacity: 0;">
+</label>
+</div>
+</sc-if>
+</div>
+</fieldset>
+</div>
+</sc-if>
+
+<sc-if value="{{isStep1}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 32px; animation: lc-rise 400ms ease-out both;">
+<fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 12px;">
+<legend style="padding: 0; margin-bottom: 12px; font-family: 'Instrument Serif', Georgia, serif; font-size: 30px; line-height: 36px;">Pra quem vai</legend>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px;">
+<sc-for list="{{dests}}" as="o" hint-placeholder-count="2">
+<button type="button" onClick="{{o.pick}}" aria-pressed="{{o.selected}}" style="text-align: left; min-height: 120px; padding: 20px; border-radius: 10px; border: {{o.border}}; background: {{o.bg}}; color: #3a2620; font-family: inherit; cursor: pointer; display: flex; flex-direction: column; gap: 8px;">
+<span style="font-size: 17px; line-height: 24px; font-weight: 500;">{{o.name}}</span>
+<span style="font-size: 15px; line-height: 22px; color: #7a5a4e;">{{o.desc}}</span>
+</button>
+</sc-for>
+</div>
+</fieldset>
+
+<sc-if value="{{toKnown}}" hint-placeholder-val="{{ false }}">
+<fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 16px;">
+<legend style="padding: 0; margin-bottom: 12px; font-family: 'Instrument Serif', Georgia, serif; font-size: 30px; line-height: 36px;">Endereço de quem recebe</legend>
+<div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px;">
+<div style="grid-column: span 6; display: flex; flex-direction: column; gap: 6px;"><label for="c-nome" style="font-size: 14px; line-height: 20px; font-weight: 500;">Nome de quem recebe</label><input id="c-nome" autocomplete="name" style="min-height: 48px; padding: 0 14px; border-radius: 4px; border: 1.5px solid #a88676; background: #fffaf4; color: #3a2620; font-family: inherit; font-size: 17px;"></div>
+<div style="grid-column: span 2; display: flex; flex-direction: column; gap: 6px;"><label for="c-cep" style="font-size: 14px; line-height: 20px; font-weight: 500;">CEP</label><input id="c-cep" inputmode="numeric" autocomplete="postal-code" placeholder="00000-000" style="min-height: 48px; padding: 0 14px; border-radius: 4px; border: 1.5px solid #a88676; background: #fffaf4; color: #3a2620; font-family: inherit; font-size: 17px;"></div>
+<div style="grid-column: span 4; display: flex; flex-direction: column; gap: 6px;"><label for="c-rua" style="font-size: 14px; line-height: 20px; font-weight: 500;">Rua</label><input id="c-rua" autocomplete="address-line1" style="min-height: 48px; padding: 0 14px; border-radius: 4px; border: 1.5px solid #a88676; background: #fffaf4; color: #3a2620; font-family: inherit; font-size: 17px;"></div>
+<div style="grid-column: span 2; display: flex; flex-direction: column; gap: 6px;"><label for="c-num" style="font-size: 14px; line-height: 20px; font-weight: 500;">Número</label><input id="c-num" inputmode="numeric" style="min-height: 48px; padding: 0 14px; border-radius: 4px; border: 1.5px solid #a88676; background: #fffaf4; color: #3a2620; font-family: inherit; font-size: 17px;"></div>
+<div style="grid-column: span 4; display: flex; flex-direction: column; gap: 6px;"><label for="c-comp" style="font-size: 14px; line-height: 20px; font-weight: 500;">Complemento <span style="font-weight: 400; color: #7a5a4e;">(opcional)</span></label><input id="c-comp" autocomplete="address-line2" style="min-height: 48px; padding: 0 14px; border-radius: 4px; border: 1.5px solid #a88676; background: #fffaf4; color: #3a2620; font-family: inherit; font-size: 17px;"></div>
+<div style="grid-column: span 4; display: flex; flex-direction: column; gap: 6px;"><label for="c-cidade" style="font-size: 14px; line-height: 20px; font-weight: 500;">Cidade</label><input id="c-cidade" autocomplete="address-level2" style="min-height: 48px; padding: 0 14px; border-radius: 4px; border: 1.5px solid #a88676; background: #fffaf4; color: #3a2620; font-family: inherit; font-size: 17px;"></div>
+<div style="grid-column: span 2; display: flex; flex-direction: column; gap: 6px;"><label for="c-uf" style="font-size: 14px; line-height: 20px; font-weight: 500;">Estado</label><input id="c-uf" autocomplete="address-level1" maxlength="2" placeholder="SP" style="min-height: 48px; padding: 0 14px; border-radius: 4px; border: 1.5px solid #a88676; background: #fffaf4; color: #3a2620; font-family: inherit; font-size: 17px;"></div>
+</div>
+<p style="margin: 0; font-size: 13px; line-height: 18px; color: #7a5a4e;">O remetente continua anônimo: no envelope vai só “alguém de {{city}}”.</p>
+</fieldset>
+</sc-if>
+
+<sc-if value="{{toClub}}" hint-placeholder-val="{{ true }}">
+<div style="padding: 20px 24px; border-radius: 10px; background: #f6d9cf; display: flex; gap: 16px; align-items: flex-start;">
+<svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3a2620" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex: 0 0 auto; margin-top: 2px;"><rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+<p style="margin: 0; font-size: 15px; line-height: 24px;">Você não precisa de endereço. A carta vai pra alguém do clube que escolheu receber cartas em casa — a gente guarda o endereço, ninguém vê o de ninguém.</p>
+</div>
+</sc-if>
+
+<fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 12px;">
+<legend style="padding: 0; margin-bottom: 12px; font-family: 'Instrument Serif', Georgia, serif; font-size: 30px; line-height: 36px;">Envio</legend>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px;">
+<sc-for list="{{shippings}}" as="o" hint-placeholder-count="2">
+<button type="button" onClick="{{o.pick}}" aria-pressed="{{o.selected}}" style="text-align: left; min-height: 96px; padding: 20px; border-radius: 10px; border: {{o.border}}; background: {{o.bg}}; color: #3a2620; font-family: inherit; cursor: pointer; display: flex; flex-direction: column; gap: 6px;">
+<span style="display: flex; justify-content: space-between; gap: 12px; align-items: baseline;"><span style="font-size: 17px; line-height: 24px; font-weight: 500;">{{o.name}}</span><span style="font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; line-height: 16px; color: #7a5a4e; white-space: nowrap;">{{o.priceLabel}}</span></span>
+<span style="font-size: 15px; line-height: 22px; color: #7a5a4e;">{{o.desc}}</span>
+</button>
+</sc-for>
+</div>
+</fieldset>
+</div>
+</sc-if>
+
+<sc-if value="{{isStep2}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 32px; animation: lc-rise 400ms ease-out both;">
+<div style="display: flex; flex-direction: column; gap: 6px; max-width: 480px;">
+<label for="c-email" style="font-size: 14px; line-height: 20px; font-weight: 500;">Seu e-mail</label>
+<input id="c-email" type="email" autocomplete="email" placeholder="voce@exemplo.com" style="min-height: 48px; padding: 0 14px; border-radius: 4px; border: 1.5px solid #a88676; background: #fffaf4; color: #3a2620; font-family: inherit; font-size: 17px;">
+<p style="margin: 0; font-size: 13px; line-height: 18px; color: #7a5a4e;">Só pra mandar o recibo e avisar quando a carta for postada.</p>
+</div>
+<fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 12px;">
+<legend style="padding: 0; margin-bottom: 12px; font-family: 'Instrument Serif', Georgia, serif; font-size: 30px; line-height: 36px;">Pagamento</legend>
+<div role="group" aria-label="Forma de pagamento" style="display: inline-flex; align-self: flex-start; padding: 4px; border-radius: 999px; background: #f6d9cf; gap: 4px;">
+<sc-for list="{{pays}}" as="p" hint-placeholder-count="2">
+<button type="button" onClick="{{p.pick}}" aria-pressed="{{p.selected}}" style="min-height: 40px; padding: 0 20px; border-radius: 999px; border: 0; background: {{p.bg}}; color: #3a2620; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer; box-shadow: {{p.shadow}};">{{p.name}}</button>
+</sc-for>
+</div>
+<sc-if value="{{isPix}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 24px; padding: 20px; border-radius: 10px; background: #fffaf4; box-shadow: inset 0 0 0 1px #e8d5c6;">
+<div aria-hidden="true" style="width: 140px; height: 140px; border-radius: 8px; box-sizing: border-box; border: 1.5px dashed #a88676; display: flex; align-items: center; justify-content: center; text-align: center; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.1em; color: #7a5a4e;">QR CODE<br>DO PIX</div>
+<p style="margin: 0; max-width: 320px; font-size: 15px; line-height: 24px; color: #7a5a4e;">O código aparece quando você confirmar. A carta entra na fila assim que o pagamento cair.</p>
+</div>
+</sc-if>
+<sc-if value="{{isCard}}" hint-placeholder-val="{{ false }}">
+<div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px; max-width: 560px;">
+<div style="grid-column: span 6; display: flex; flex-direction: column; gap: 6px;"><label for="c-cc" style="font-size: 14px; line-height: 20px; font-weight: 500;">Número do cartão</label><input id="c-cc" inputmode="numeric" autocomplete="cc-number" placeholder="0000 0000 0000 0000" style="min-height: 48px; padding: 0 14px; border-radius: 4px; border: 1.5px solid #a88676; background: #fffaf4; color: #3a2620; font-family: inherit; font-size: 17px;"></div>
+<div style="grid-column: span 6; display: flex; flex-direction: column; gap: 6px;"><label for="c-ccname" style="font-size: 14px; line-height: 20px; font-weight: 500;">Nome no cartão</label><input id="c-ccname" autocomplete="cc-name" style="min-height: 48px; padding: 0 14px; border-radius: 4px; border: 1.5px solid #a88676; background: #fffaf4; color: #3a2620; font-family: inherit; font-size: 17px;"></div>
+<div style="grid-column: span 3; display: flex; flex-direction: column; gap: 6px;"><label for="c-ccexp" style="font-size: 14px; line-height: 20px; font-weight: 500;">Validade</label><input id="c-ccexp" autocomplete="cc-exp" placeholder="MM/AA" style="min-height: 48px; padding: 0 14px; border-radius: 4px; border: 1.5px solid #a88676; background: #fffaf4; color: #3a2620; font-family: inherit; font-size: 17px;"></div>
+<div style="grid-column: span 3; display: flex; flex-direction: column; gap: 6px;"><label for="c-cccvc" style="font-size: 14px; line-height: 20px; font-weight: 500;">CVV</label><input id="c-cccvc" inputmode="numeric" autocomplete="cc-csc" placeholder="123" style="min-height: 48px; padding: 0 14px; border-radius: 4px; border: 1.5px solid #a88676; background: #fffaf4; color: #3a2620; font-family: inherit; font-size: 17px;"></div>
+</div>
+</sc-if>
+</fieldset>
+</div>
+</sc-if>
+
+<sc-if value="{{isDone}}" hint-placeholder-val="{{ false }}">
+<div role="status" style="display: flex; flex-direction: column; gap: 24px; padding: 40px; border-radius: 24px; background: #3f6b57; color: #fbf3ea; animation: lc-rise 500ms ease-out both;">
+<p style="margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500;">PEDIDO CONFIRMADO</p>
+<p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 44px; line-height: 48px;">Sua carta vai pro <em>correio</em>.</p>
+<ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px;">
+<li style="display: flex; gap: 12px; font-size: 17px; line-height: 27px;"><span style="font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; line-height: 27px; letter-spacing: 0.1em;">01</span>{{doneStep1}}</li>
+<li style="display: flex; gap: 12px; font-size: 17px; line-height: 27px;"><span style="font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; line-height: 27px; letter-spacing: 0.1em;">02</span>Ela ganha envelope, selo e carimbo de {{city}}.</li>
+<li style="display: flex; gap: 12px; font-size: 17px; line-height: 27px;"><span style="font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 12px; line-height: 27px; letter-spacing: 0.1em;">03</span>{{doneStep3}}</li>
+</ol>
+<div style="display: flex; flex-wrap: wrap; gap: 12px;">
+<a href="Mural.dc.html" style="display: inline-flex; align-items: center; min-height: 52px; padding: 0 28px; border-radius: 999px; background: #fbf3ea; color: #3f6b57; font-size: 14px; line-height: 20px; font-weight: 500; text-decoration: none;">Ver o mural</a>
+<a href="Escrever.dc.html" style="display: inline-flex; align-items: center; min-height: 52px; padding: 0 28px; border-radius: 999px; border: 1.5px solid #fbf3ea; color: #fbf3ea; font-size: 14px; line-height: 20px; font-weight: 500; text-decoration: none;">Escrever outra</a>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{showNav}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding-top: 24px; border-top: 1px solid #e8d5c6;">
+<sc-if value="{{canBack}}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{back}}" style="min-height: 52px; padding: 0 24px; border-radius: 999px; border: 1.5px solid #a88676; background: transparent; color: #3a2620; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer;">Voltar</button>
+</sc-if>
+<span style="flex: 1 1 auto;"></span>
+<button type="button" onClick="{{next}}" style="min-height: 52px; padding: 0 28px; border-radius: 999px; border: 0; background: #c23b32; color: #ffffff; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer;">{{nextLabel}}</button>
+</div>
+</sc-if>
+</section>
+
+<aside aria-label="Resumo do pedido" style="flex: 1 1 340px; max-width: 420px; min-width: 0; box-sizing: border-box; padding: 28px; border-radius: 24px; background: #fffaf4; box-shadow: 0 1px 2px rgba(58,38,32,0.08), 0 10px 28px rgba(58,38,32,0.10); display: flex; flex-direction: column; gap: 24px;">
+<p style="margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500; color: #7a5a4e;">RESUMO</p>
+
+<div aria-hidden="true" style="position: relative; height: 230px; display: flex; align-items: flex-end; justify-content: center;">
+<div style="position: absolute; left: 18%; right: 18%; top: 4px; height: 150px; border-radius: 6px; background-color: {{paperSwatch}}; background-image: repeating-linear-gradient(to bottom, transparent 0px, transparent 17px, rgba(58,38,32,0.12) 17px, rgba(58,38,32,0.12) 18px); box-shadow: 0 6px 16px rgba(58,38,32,0.15); transform: rotate(-4deg); padding: 18px 16px; box-sizing: border-box; transition: background-color 300ms ease-out;">
+<span style="font-family: {{previewFont}}; font-size: {{previewSize}}; line-height: 18px; color: #3a2620;">o mar continua aqui. ele espera sem pressa…</span>
+</div>
+<div style="position: relative; width: 82%; aspect-ratio: 16 / 10; border-radius: 8px; background: {{envSwatch}}; box-shadow: 0 2px 4px rgba(58,38,32,0.10), 0 14px 30px rgba(58,38,32,0.18); overflow: hidden; transform: rotate(2deg); transition: background-color 300ms ease-out;">
+<svg viewBox="0 0 160 100" preserveAspectRatio="none" style="position: absolute; inset: 0; width: 100%; height: 100%;"><path d="M0 0 L80 58 L160 0" fill="none" stroke="{{envLine}}" stroke-width="0.8"></path></svg>
+<sc-if value="{{hasWax}}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; left: 50%; top: 58%; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; background: #c23b32; box-shadow: 0 2px 6px rgba(58,38,32,0.3), inset 0 0 0 4px rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center;"><span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 24px; line-height: 1; color: #fbf3ea;">l</span></div>
+</sc-if>
+<div style="position: absolute; right: 6%; top: 10%;"><dc-import name="Selo" kind="{{stamp}}" hint-size="50px,50px"></dc-import></div>
+</div>
+</div>
+
+<ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px;">
+<sc-for list="{{lines}}" as="ln" hint-placeholder-count="4">
+<li style="display: flex; justify-content: space-between; gap: 12px; font-size: 15px; line-height: 22px;"><span>{{ln.label}}</span><span style="font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 13px; color: #7a5a4e; white-space: nowrap;">{{ln.price}}</span></li>
+</sc-for>
+</ul>
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-top: 16px; border-top: 1px solid #e8d5c6;">
+<span style="font-size: 17px; line-height: 24px; font-weight: 500;">Total</span>
+<span style="font-family: 'Instrument Serif', Georgia, serif; font-size: 36px; line-height: 1;">{{total}}</span>
+</div>
+<p style="margin: 0; font-size: 13px; line-height: 18px; color: #7a5a4e;">{{eta}}</p>
+</aside>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"basePrice":{"editor":"float","default":24.9,"min":0,"step":0.1,"section":"Preços (exemplo)"},"calligrapherPrice":{"editor":"float","default":19.9,"min":0,"step":0.1,"section":"Preços (exemplo)"},"photoPrice":{"editor":"float","default":4.9,"min":0,"step":0.1,"section":"Preços (exemplo)"},"trackedPrice":{"editor":"float","default":12.9,"min":0,"step":0.1,"section":"Preços (exemplo)"},"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+  state = { step: 0, method: 0, paper: 0, envelope: 0, extras: {}, photos: 0, dest: 0, shipping: 0, pay: 0 };
+  money(v) { return 'R$ ' + v.toFixed(2).replace('.', ','); }
+  num(name, def) { const v = Number(this.props[name] ?? def); return isNaN(v) ? def : v; }
+  sel(on) {
+    return {
+      selected: on ? 'true' : 'false',
+      border: on ? '2px solid #c23b32' : '1.5px solid #e8d5c6',
+      bg: on ? '#fffaf4' : 'transparent'
+    };
+  }
+  renderVals() {
+    const st = this.state || {};
+    const step = st.step || 0;
+    const base = this.num('basePrice', 24.9);
+    const METHODS = [
+      { name: 'Impressa na sua caneta', desc: 'A sua letra digital, impressa em tinta sobre o papel escolhido.', price: 0, sample: 'Querida pessoa,', font: "'La Belle Aurore', 'Segoe Script', cursive", size: '26px' },
+      { name: 'Escrita à mão por um calígrafo', desc: 'Alguém do nosso time copia a sua carta à mão, com caneta-tinteiro. Como o Theodore fazia.', price: this.num('calligrapherPrice', 19.9), sample: 'Querida pessoa,', font: "'Homemade Apple', 'Segoe Script', cursive", size: '18px' }
+    ];
+    const PAPERS = [
+      { name: 'Pólen creme', desc: 'O clássico. Leve e quentinho.', price: 0, swatch: '#fbf3ea' },
+      { name: 'Algodão', desc: 'Grosso, com textura de fibra.', price: 6, swatch: '#fffaf4' },
+      { name: 'Rosado', desc: 'Papel tingido em blush.', price: 3, swatch: '#f6d9cf' }
+    ];
+    const ENVELOPES = [
+      { name: 'Pêssego', swatch: '#f2b8a2', line: 'rgba(58,38,32,0.28)' },
+      { name: 'Creme', swatch: '#fffaf4', line: 'rgba(58,38,32,0.22)' },
+      { name: 'Mostarda', swatch: '#d9a441', line: 'rgba(58,38,32,0.3)' },
+      { name: 'Sálvia', swatch: '#3f6b57', line: 'rgba(251,243,234,0.35)' }
+    ];
+    const EXTRAS = [
+      { id: 'cera', name: 'Lacre de cera', desc: 'Selado à mão com cera coral e a marca do clube.', price: 5.9 },
+      { id: 'flor', name: 'Flor prensada', desc: 'Uma flor seca da estação, dentro do envelope.', price: 7.9 },
+      { id: 'postal', name: 'Postal da sua cidade', desc: 'Um cartão ilustrado de onde você escreveu.', price: 3.9 }
+    ];
+    const DESTS = [
+      { name: 'Pra alguém do clube', desc: 'Anônimo dos dois lados. A gente escolhe alguém que topou receber cartas em casa.' },
+      { name: 'Pra alguém que você conhece', desc: 'Você informa o endereço. A pessoa recebe sem saber quem mandou — se você quiser.' }
+    ];
+    const SHIPS = [
+      { name: 'Carta simples', desc: 'Chega em 7 a 10 dias úteis. Devagar, do jeito que a gente gosta.', price: 0 },
+      { name: 'Registrada', desc: 'Com código de rastreio e aviso de entrega.', price: this.num('trackedPrice', 12.9) }
+    ];
+    const extras = st.extras || {};
+    const photos = st.photos || 0;
+    const photoPrice = this.num('photoPrice', 4.9);
+    const m = METHODS[st.method || 0];
+    const p = PAPERS[st.paper || 0];
+    const e = ENVELOPES[st.envelope || 0];
+    const sh = SHIPS[st.shipping || 0];
+
+    const lines = [{ label: 'Carta + envelope + selo + postagem', price: this.money(base) }];
+    if (m.price) lines.push({ label: 'Calígrafo', price: this.money(m.price) });
+    if (p.price) lines.push({ label: 'Papel ' + p.name.toLowerCase(), price: this.money(p.price) });
+    EXTRAS.forEach((x) => { if (extras[x.id]) lines.push({ label: x.name, price: this.money(x.price) }); });
+    if (photos) lines.push({ label: photos + (photos === 1 ? ' foto' : ' fotos'), price: this.money(photos * photoPrice) });
+    if (sh.price) lines.push({ label: 'Envio registrado', price: this.money(sh.price) });
+    const total = base + m.price + p.price + EXTRAS.reduce((s, x) => s + (extras[x.id] ? x.price : 0), 0) + photos * photoPrice + sh.price;
+
+    const STEPS = ['Papelaria', 'Envio', 'Pagamento'];
+    const city = 'São Paulo';
+    const pick = (key, i) => () => this.setState({ [key]: i });
+    return {
+      steps: STEPS.map((name, i) => {
+        const cur = i === step;
+        const done = i < step || step === 3;
+        return {
+          name, num: done ? '✓' : String(i + 1),
+          current: cur ? 'step' : 'false',
+          border: cur ? '#c23b32' : '#e8d5c6',
+          bg: cur ? '#fffaf4' : 'transparent',
+          fg: '#3a2620',
+          dotBg: cur || done ? '#c23b32' : '#f6d9cf',
+          dotFg: cur || done ? '#ffffff' : '#3a2620',
+          go: () => { if (step !== 3) this.setState({ step: i }); }
+        };
+      }),
+      isStep0: step === 0, isStep1: step === 1, isStep2: step === 2, isDone: step === 3,
+      showNav: step < 3, canBack: step > 0 && step < 3,
+      back: () => this.setState({ step: Math.max(0, step - 1) }),
+      next: () => this.setState({ step: Math.min(3, step + 1) }),
+      nextLabel: step === 2 ? 'Pagar ' + this.money(total) : 'Continuar',
+      methods: METHODS.map((o, i) => Object.assign(this.sel(i === (st.method || 0)), {
+        name: o.name, desc: o.desc, priceLabel: o.price ? '+ ' + this.money(o.price) : 'incluso',
+        sample: o.sample, sampleFont: o.font, sampleSize: o.size, pick: pick('method', i)
+      })),
+      papers: PAPERS.map((o, i) => Object.assign(this.sel(i === (st.paper || 0)), {
+        name: o.name, desc: o.desc, swatch: o.swatch, priceLabel: o.price ? '+ ' + this.money(o.price) : 'incluso', pick: pick('paper', i)
+      })),
+      envelopes: ENVELOPES.map((o, i) => Object.assign(this.sel(i === (st.envelope || 0)), {
+        name: o.name, swatch: o.swatch, pick: pick('envelope', i)
+      })),
+      extras: EXTRAS.map((x) => {
+        const on = !!extras[x.id];
+        return Object.assign(this.sel(on), {
+          name: x.name, desc: x.desc, priceLabel: '+ ' + this.money(x.price),
+          boxBorder: on ? '#c23b32' : '#a88676', boxBg: on ? '#c23b32' : 'transparent',
+          toggle: () => {
+            const nx = Object.assign({}, (this.state && this.state.extras) || {});
+            nx[x.id] = !nx[x.id];
+            this.setState({ extras: nx });
+          }
+        });
+      }),
+      photos: String(photos),
+      hasPhotos: photos > 0,
+      photoSlots: Array.from({ length: photos }, (_, i) => ({ label: 'FOTO ' + (i + 1), tilt: ['-3deg', '2deg', '-1deg'][i] })),
+      photoPriceLabel: this.money(photoPrice),
+      photoMinus: () => this.setState({ photos: Math.max(0, photos - 1) }),
+      photoPlus: () => this.setState({ photos: Math.min(3, photos + 1) }),
+      dests: DESTS.map((o, i) => Object.assign(this.sel(i === (st.dest || 0)), { name: o.name, desc: o.desc, pick: pick('dest', i) })),
+      toClub: (st.dest || 0) === 0,
+      toKnown: (st.dest || 0) === 1,
+      shippings: SHIPS.map((o, i) => Object.assign(this.sel(i === (st.shipping || 0)), {
+        name: o.name, desc: o.desc, priceLabel: o.price ? '+ ' + this.money(o.price) : 'incluso', pick: pick('shipping', i)
+      })),
+      pays: ['Pix', 'Cartão'].map((name, i) => ({
+        name, selected: i === (st.pay || 0) ? 'true' : 'false',
+        bg: i === (st.pay || 0) ? '#fffaf4' : 'transparent',
+        shadow: i === (st.pay || 0) ? '0 1px 2px rgba(58,38,32,0.12)' : 'none',
+        pick: pick('pay', i)
+      })),
+      isPix: (st.pay || 0) === 0,
+      isCard: (st.pay || 0) === 1,
+      city,
+      paperSwatch: p.swatch,
+      envSwatch: e.swatch,
+      envLine: e.line,
+      hasWax: !!extras.cera,
+      stamp: 'sol',
+      previewFont: m.font,
+      previewSize: (st.method || 0) === 1 ? '11px' : '16px',
+      lines,
+      total: this.money(total),
+      eta: sh.price ? 'Postagem em até 3 dias úteis, com rastreio.' : 'Postagem em até 3 dias úteis. Depois é com o correio.',
+      doneStep1: (st.method || 0) === 1 ? 'Um calígrafo copia a sua carta à mão, com caneta-tinteiro.' : 'A gente imprime a sua carta na caneta que você escolheu.',
+      doneStep3: (st.dest || 0) === 0 ? 'Ela vai pro correio rumo a alguém do clube. Você recebe um e-mail quando for postada.' : 'Ela vai pro correio rumo ao endereço que você informou. Você recebe um e-mail quando for postada.'
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>letterclub — escrever uma carta</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Work+Sans:wght@400;500&amp;family=IBM+Plex+Mono:wght@500&amp;family=Homemade+Apple&amp;family=La+Belle+Aurore&amp;family=Caveat:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#fbf3ea}
+a{color:#c23b32}a:hover{color:#3a2620}
+:focus-visible{outline:2px solid #3a2620;outline-offset:2px}
+textarea::placeholder{color:#7a5a4e;opacity:1}
+@keyframes lc-wave{from{transform:scaleY(.2)}to{transform:scaleY(1)}}
+@keyframes lc-blink{0%,45%{opacity:1}55%,100%{opacity:0}}
+@keyframes lc-rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes lc-into-envelope{0%{transform:none;opacity:1}60%{transform:translateY(40px) scale(.7) rotate(-2deg);opacity:1}100%{transform:translateY(140px) scale(.5);opacity:0}}
+@keyframes lc-envelope-in{from{opacity:0;transform:translateY(30px) rotate(-4deg)}to{opacity:1;transform:rotate(-2deg)}}
+@media (prefers-reduced-motion: reduce){
+*{animation-duration:1ms !important;animation-iteration-count:1 !important;animation-delay:0ms !important;transition:none !important}
+}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #fbf3ea; color: #3a2620; font-family: 'Work Sans', 'Helvetica Neue', Arial, sans-serif;">
+
+<header style="max-width: 1360px; margin: 0 auto; box-sizing: border-box; padding: 28px 5%; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;">
+<a href="Main.dc.html" style="font-family: 'Instrument Serif', Georgia, serif; font-size: 34px; line-height: 1; text-decoration: none; color: #c23b32;">letterclub</a>
+<nav aria-label="Principal" style="display: flex; flex-wrap: wrap; align-items: center; gap: 28px; font-size: 14px; line-height: 20px; font-weight: 500;">
+<a href="Main.dc.html" style="text-decoration: none; padding: 12px 0; color: #3a2620;">início</a>
+<a href="Cartas.dc.html" style="text-decoration: none; padding: 12px 0; color: #3a2620;">cartas</a>
+<a href="Mural.dc.html" style="text-decoration: none; padding: 12px 0; color: #3a2620;">mural</a>
+<a href="Clube.dc.html" style="text-decoration: none; padding: 12px 0; color: #3a2620;">o clube</a>
+<a href="Caixa.dc.html" style="text-decoration: none; padding: 12px 0; color: #3a2620;">sua caixa</a>
+</nav>
+</header>
+
+<main style="max-width: 1360px; margin: 0 auto; box-sizing: border-box; padding: 8px 5% 96px; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 56px;">
+
+<section aria-labelledby="escrever-titulo" style="flex: 1 1 400px; max-width: 500px; min-width: 0; display: flex; flex-direction: column; gap: 32px; animation: lc-rise 700ms cubic-bezier(.22,.61,.36,1) both;">
+<div style="display: flex; flex-direction: column; gap: 12px;">
+<p style="margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500; color: #c23b32;">NOVA CARTA</p>
+<h1 id="escrever-titulo" style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 48px; line-height: 50px; letter-spacing: -0.01em;">Escreva para alguém.</h1>
+<p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 24px; line-height: 30px; color: #7a5a4e;">com calma. ninguém está com pressa.</p>
+</div>
+
+<fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 12px;">
+<legend style="padding: 0; margin-bottom: 12px; font-size: 14px; line-height: 20px; font-weight: 500;">Caneta</legend>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px;">
+<sc-for list="{{pens}}" as="p" hint-placeholder-count="3">
+<button type="button" onClick="{{p.pick}}" aria-pressed="{{p.selected}}" style="min-height: 88px; padding: 12px 10px; border-radius: 10px; border: {{p.border}}; background: {{p.bg}}; color: #3a2620; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; transition: border-color 240ms ease-out, background-color 240ms ease-out;">
+<span style="font-family: {{p.family}}; font-size: {{p.pickSize}}; line-height: 40px; white-space: nowrap;">{{p.name}}</span>
+<span style="font-size: 13px; line-height: 18px; color: #7a5a4e;">{{p.hint}}</span>
+</button>
+</sc-for>
+</div>
+</fieldset>
+
+<fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 14px;">
+<legend style="padding: 0; margin-bottom: 12px; font-size: 14px; line-height: 20px; font-weight: 500;">Papel</legend>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px;">
+<sc-for list="{{papers}}" as="c" hint-placeholder-count="6">
+<button type="button" onClick="{{c.pick}}" aria-pressed="{{c.selected}}" aria-label="{{c.label}}" title="{{c.label}}" style="width: 48px; height: 48px; padding: 0; border: 0; background: transparent; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
+<span style="display: block; width: 34px; height: 34px; border-radius: 50%; background: {{c.bg}}; box-shadow: {{c.ring}}; transition: box-shadow 240ms ease-out;"></span>
+</button>
+</sc-for>
+<span style="margin-left: 8px; font-size: 13px; line-height: 18px; color: #7a5a4e;">{{paperName}}</span>
+</div>
+<div role="group" aria-label="Textura do papel" style="display: inline-flex; align-self: flex-start; padding: 4px; border-radius: 999px; background: #f6d9cf; gap: 4px;">
+<sc-for list="{{textures}}" as="t" hint-placeholder-count="3">
+<button type="button" onClick="{{t.pick}}" aria-pressed="{{t.selected}}" style="min-height: 40px; padding: 0 18px; border-radius: 999px; border: 0; background: {{t.bg}}; color: #3a2620; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer; box-shadow: {{t.shadow}}; transition: background-color 240ms ease-out;">{{t.name}}</button>
+</sc-for>
+</div>
+</fieldset>
+
+<div style="display: flex; flex-direction: column; gap: 8px;">
+<label for="lc-cidade" style="font-size: 14px; line-height: 20px; font-weight: 500;">De onde você escreve</label>
+<select id="lc-cidade" value="{{city}}" onChange="{{onCity}}" style="min-height: 48px; padding: 0 14px; border-radius: 4px; border: 1.5px solid #a88676; background: #fffaf4; color: #3a2620; font-family: inherit; font-size: 17px; line-height: 27px;">
+<sc-for list="{{cities}}" as="o" hint-placeholder-count="8">
+<option value="{{o.name}}">{{o.name}}</option>
+</sc-for>
+</select>
+<p style="margin: 0; font-size: 13px; line-height: 18px; color: #7a5a4e;">Ninguém vê seu nome. A cidade e a hora são a sua assinatura.</p>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 8px;">
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;">
+<label for="lc-texto" style="font-size: 14px; line-height: 20px; font-weight: 500;">Sua carta</label>
+<button type="button" onClick="{{toggleMic}}" aria-pressed="{{micPressed}}" style="min-height: 44px; padding: 0 18px 0 14px; border-radius: 999px; border: 1.5px solid {{micBorder}}; background: {{micBg}}; color: {{micFg}}; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: background-color 240ms ease-out;">
+<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3"></path></svg>
+{{micLabel}}
+</button>
+</div>
+<sc-if value="{{listening}}" hint-placeholder-val="{{ false }}">
+<div role="status" style="display: flex; align-items: center; gap: 14px; min-height: 44px; padding: 0 18px; border-radius: 999px; background: #3a2620; color: #ffffff;">
+<div aria-hidden="true" style="height: 24px; display: flex; align-items: center; gap: 3px;">
+<sc-for list="{{micBars}}" as="b" hint-placeholder-count="20">
+<span style="display: block; width: 2px; height: {{b.h}}; border-radius: 999px; background: #f2b8a2; transform-origin: center; animation: lc-wave {{b.dur}} ease-in-out {{b.delay}} infinite alternate;"></span>
+</sc-for>
+</div>
+<span style="font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500;">OUVINDO · FALE COM CALMA</span>
+</div>
+</sc-if>
+<sc-if value="{{hasMicMsg}}" hint-placeholder-val="{{ false }}">
+<p role="status" style="margin: 0; font-size: 13px; line-height: 18px; color: #c23b32;">{{micMsg}}</p>
+</sc-if>
+<textarea id="lc-texto" value="{{text}}" onChange="{{onText}}" rows="8" maxlength="{{max}}" placeholder="Querida pessoa que eu não conheço," style="box-sizing: border-box; width: 100%; padding: 14px 16px; border-radius: 4px; border: 1.5px solid #a88676; background: #fffaf4; color: #3a2620; font-family: inherit; font-size: 17px; line-height: 27px; resize: vertical;"></textarea>
+<p style="margin: 0; font-size: 13px; line-height: 18px; color: #7a5a4e;">{{lengthHint}}</p>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px;">
+<p aria-live="polite" style="margin: 0; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; line-height: 18px; color: {{saveColor}};">
+<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+{{saveStatus}}
+</p>
+<sc-if value="{{hasDraft}}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{discard}}" style="min-height: 44px; padding: 0 4px; border: 0; background: transparent; color: #c23b32; font-family: inherit; font-size: 13px; line-height: 18px; font-weight: 500; text-decoration: underline; text-underline-offset: 3px; cursor: pointer;">Descartar rascunho</button>
+</sc-if>
+</div>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px;">
+<button type="button" onClick="{{send}}" disabled="{{cantSend}}" style="min-height: 52px; padding: 0 28px; border-radius: 999px; border: 0; background: #c23b32; color: #ffffff; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: {{sendCursor}}; opacity: {{sendOpacity}}; transition: opacity 240ms ease-out;">Enviar carta</button>
+<p style="margin: 0; font-size: 13px; line-height: 18px; color: #7a5a4e;">Chega em 2 dias.</p>
+</div>
+<a href="Correio.dc.html" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 14px; line-height: 20px; font-weight: 500;">
+<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 7l9 6 9-6"></path></svg>
+ou mande pelo correio, de verdade
+</a>
+</section>
+
+<section aria-label="Prévia da carta" style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 20px; padding-top: 8px;">
+<p style="margin: 0; align-self: stretch; text-align: center; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500; color: #7a5a4e;">{{previewLabel}}</p>
+
+<sc-if value="{{writing}}" hint-placeholder-val="{{ true }}">
+<article style="box-sizing: border-box; width: 100%; max-width: 560px; min-height: 700px; padding: 44px 48px; border-radius: 10px; background-color: {{tone.bg}}; color: {{tone.fg}}; box-shadow: 0 2px 4px rgba(58,38,32,0.10), 0 18px 40px rgba(58,38,32,0.18); display: flex; flex-direction: column; gap: 24px; transform: rotate(-0.6deg); transition: background-color 400ms ease-out, color 400ms ease-out; animation: {{sheetAnim}};">
+<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;">
+<div style="display: flex; flex-direction: column; gap: 2px;">
+<p style="margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500; color: {{tone.muted}};">{{postmark}}</p>
+<p style="margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500; color: {{tone.muted}};">{{date}}</p>
+</div>
+<div style="flex: 0 0 auto;"><dc-import name="Selo" kind="sol" hint-size="50px,50px"></dc-import></div>
+</div>
+<div style="flex: 1 1 auto; min-height: 432px; font-family: {{pen.family}}; font-size: {{pen.size}}; line-height: 36px; white-space: pre-wrap; overflow-wrap: anywhere; background-image: {{paperTexture}}; background-size: {{paperSize}}; transition: font-size 240ms ease-out;">
+<sc-if value="{{empty}}" hint-placeholder-val="{{ false }}"><span style="opacity: 0.4;">Querida pessoa que eu não conheço,</span></sc-if><sc-if value="{{hasText}}" hint-placeholder-val="{{ true }}"><span>{{text}}</span></sc-if><sc-if value="{{hasInterim}}" hint-placeholder-val="{{ false }}"><span style="opacity: 0.45;">{{interimText}}</span></sc-if><span aria-hidden="true" style="display: inline-block; width: 2px; height: 26px; margin-left: 2px; vertical-align: -5px; background: {{tone.sig}}; animation: lc-blink 1s steps(1) infinite;"></span>
+</div>
+<p style="margin: 0; align-self: flex-end; font-family: 'Homemade Apple', 'Segoe Script', cursive; font-size: 22px; line-height: 36px; color: {{tone.sig}};">{{signature}}</p>
+</article>
+</sc-if>
+
+<sc-if value="{{sent}}" hint-placeholder-val="{{ false }}">
+<div style="box-sizing: border-box; width: 100%; max-width: 560px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; text-align: center;">
+<div aria-hidden="true" style="position: relative; width: 100%; max-width: 440px; aspect-ratio: 16 / 10; border-radius: 10px; background: #f2b8a2; box-shadow: 0 2px 4px rgba(58,38,32,0.10), 0 18px 40px rgba(58,38,32,0.22); overflow: hidden; animation: lc-envelope-in 700ms cubic-bezier(.22,.61,.36,1) 500ms both;">
+<svg viewBox="0 0 160 100" preserveAspectRatio="none" style="position: absolute; inset: 0; width: 100%; height: 100%;"><path d="M0 0 L80 58 L160 0" fill="none" stroke="rgba(58,38,32,0.28)" stroke-width="0.8"></path><path d="M0 100 L62 46 M160 100 L98 46" fill="none" stroke="rgba(58,38,32,0.16)" stroke-width="0.8"></path></svg>
+<div style="position: absolute; left: 50%; top: 58%; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; background: #c23b32; display: flex; align-items: center; justify-content: center;">
+<span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 34px; line-height: 1; color: #fbf3ea;">l</span>
+</div>
+<p style="position: absolute; left: 7%; bottom: 9%; margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500; color: #3a2620;">{{postmark}}</p>
+</div>
+<div role="status" style="display: flex; flex-direction: column; gap: 8px; animation: lc-rise 700ms ease-out 900ms both;">
+<p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 36px; line-height: 40px;">Sua carta está a caminho.</p>
+<p style="margin: 0; font-size: 17px; line-height: 27px; color: #7a5a4e;">Ela chega em 2 dias na caixa de alguém. Você nunca vai saber quem — e tudo bem.</p>
+</div>
+<div style="box-sizing: border-box; width: 100%; max-width: 480px; padding: 24px; border-radius: 24px; background: #c23b32; color: #ffffff; display: flex; flex-direction: column; align-items: center; gap: 12px; animation: lc-rise 700ms ease-out 1100ms both;">
+<p style="margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500;">E SE ELA CHEGASSE DE VERDADE?</p>
+<p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 30px; line-height: 34px;">Papel, envelope, selo e <em style="color: #f2b8a2;">correio</em>.</p>
+<p style="margin: 0; font-size: 15px; line-height: 24px;">A gente imprime — ou um calígrafo escreve à mão — e manda pela caixa de correio. Dá pra colocar fotos e uma flor prensada.</p>
+<a href="Correio.dc.html" style="display: inline-flex; align-items: center; min-height: 52px; padding: 0 28px; border-radius: 999px; background: #fbf3ea; color: #c23b32; font-size: 14px; line-height: 20px; font-weight: 500; text-decoration: none;">Mandar pelo correio</a>
+</div>
+<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; animation: lc-rise 700ms ease-out 1300ms both;">
+<button type="button" onClick="{{again}}" style="min-height: 52px; padding: 0 28px; border-radius: 999px; border: 0; background: #c23b32; color: #ffffff; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer;">Escrever outra carta</button>
+<a href="Mural.dc.html" style="display: inline-flex; align-items: center; min-height: 52px; padding: 0 28px; border-radius: 999px; border: 1.5px solid #a88676; color: #3a2620; font-size: 14px; line-height: 20px; font-weight: 500; text-decoration: none;">Ver o mural</a>
+</div>
+</div>
+</sc-if>
+</section>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  state = { text: '', pen: 0, paper: 0, texture: 0, city: 'São Paulo', phase: 'writing', listening: false, interim: '', micMsg: '', saving: false, savedAt: null, restored: false, storeOk: true };
+  componentDidMount() {
+    try {
+      const raw = window.localStorage.getItem('letterclub:rascunho');
+      if (raw) {
+        const d = JSON.parse(raw);
+        if (d && d.text) {
+          this.setState({
+            text: String(d.text).slice(0, 700), pen: d.pen || 0, paper: d.paper || 0, texture: d.texture || 0,
+            city: d.city || 'São Paulo', savedAt: this.hhmm(d.savedAt), restored: true
+          });
+        }
+      }
+    } catch (e) {}
+  }
+  componentWillUnmount() {
+    clearTimeout(this.timer);
+    clearTimeout(this.saveTimer);
+    try { if (this.rec) this.rec.stop(); } catch (e) {}
+  }
+  hhmm(iso) {
+    const d = iso ? new Date(iso) : new Date();
+    if (isNaN(d.getTime())) return null;
+    return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  }
+  update(patch) {
+    this.setState(Object.assign({}, patch, { restored: false }), () => this.queueSave());
+  }
+  queueSave() {
+    clearTimeout(this.saveTimer);
+    this.setState({ saving: true });
+    this.saveTimer = setTimeout(() => this.saveDraft(), 800);
+  }
+  saveDraft() {
+    const s = this.state || {};
+    try {
+      if (!s.text) {
+        window.localStorage.removeItem('letterclub:rascunho');
+        this.setState({ saving: false, savedAt: null, storeOk: true });
+        return;
+      }
+      const now = new Date().toISOString();
+      window.localStorage.setItem('letterclub:rascunho', JSON.stringify({ text: s.text, pen: s.pen, paper: s.paper, texture: s.texture, city: s.city, savedAt: now }));
+      this.setState({ saving: false, savedAt: this.hhmm(now), storeOk: true });
+    } catch (e) {
+      this.setState({ saving: false, storeOk: false });
+    }
+  }
+  clearDraft() {
+    clearTimeout(this.saveTimer);
+    try { window.localStorage.removeItem('letterclub:rascunho'); } catch (e) {}
+    this.setState({ saving: false, savedAt: null, restored: false });
+  }
+  stopMic() {
+    try { if (this.rec) this.rec.stop(); } catch (e) {}
+    this.setState({ listening: false, interim: '' });
+  }
+  toggleMic() {
+    if (this.state && this.state.listening) { this.stopMic(); return; }
+    const SR = typeof window !== 'undefined' && (window.SpeechRecognition || window.webkitSpeechRecognition);
+    if (!SR) { this.setState({ micMsg: 'O ditado não funciona neste navegador. No Chrome e no Safari funciona.' }); return; }
+    const rec = new SR();
+    rec.lang = 'pt-BR';
+    rec.continuous = true;
+    rec.interimResults = true;
+    rec.onresult = (ev) => {
+      let interim = '';
+      let finalText = '';
+      for (let i = ev.resultIndex; i < ev.results.length; i++) {
+        const r = ev.results[i];
+        if (r.isFinal) finalText += r[0].transcript; else interim += r[0].transcript;
+      }
+      if (finalText.trim()) {
+        const cur = (this.state && this.state.text) || '';
+        const sep = cur && !/\s$/.test(cur) ? ' ' : '';
+        this.update({ text: (cur + sep + finalText.trim()).slice(0, 700) });
+      }
+      this.setState({ interim: interim.trim() });
+    };
+    rec.onerror = (e) => {
+      const msg = e && e.error === 'not-allowed' ? 'A gente precisa da permissão do microfone pra ditar.' : (e && e.error === 'no-speech' ? 'Não ouvimos nada. Toque no microfone e tente de novo.' : 'O ditado parou. Toque no microfone pra continuar.');
+      this.setState({ listening: false, interim: '', micMsg: msg });
+    };
+    rec.onend = () => this.setState({ listening: false, interim: '' });
+    try {
+      rec.start();
+      this.rec = rec;
+      this.setState({ listening: true, micMsg: '' });
+    } catch (e) {
+      this.setState({ micMsg: 'Não deu pra ligar o microfone agora.' });
+    }
+  }
+  renderVals() {
+    const st = this.state || {};
+    const MAX = 700;
+    const PENS = [
+      { name: 'cursiva', hint: 'a de tinta', family: "'Homemade Apple', 'Segoe Script', cursive", size: '19px', pickSize: '17px' },
+      { name: 'pena fina', hint: 'delicada', family: "'La Belle Aurore', 'Segoe Script', cursive", size: '28px', pickSize: '26px' },
+      { name: 'letra de forma', hint: 'a mais legível', family: "'Caveat', 'Segoe Print', cursive", size: '26px', pickSize: '26px' }
+    ];
+    const PAPERS = [
+      { label: 'Creme', bg: '#fffaf4', fg: '#3a2620', muted: '#7a5a4e', rule: '#e8d5c6', sig: '#c23b32' },
+      { label: 'Blush', bg: '#f6d9cf', fg: '#3a2620', muted: '#7a5a4e', rule: 'rgba(58,38,32,0.16)', sig: '#3a2620' },
+      { label: 'Pêssego', bg: '#f2b8a2', fg: '#3a2620', muted: '#3a2620', rule: 'rgba(58,38,32,0.18)', sig: '#3a2620' },
+      { label: 'Ocre', bg: '#d9a441', fg: '#3a2620', muted: '#3a2620', rule: 'rgba(58,38,32,0.2)', sig: '#3a2620' },
+      { label: 'Sálvia', bg: '#3f6b57', fg: '#fbf3ea', muted: '#fbf3ea', rule: 'rgba(251,243,234,0.24)', sig: '#fbf3ea' },
+      { label: 'Coral', bg: '#c23b32', fg: '#ffffff', muted: '#ffffff', rule: 'rgba(255,255,255,0.28)', sig: '#ffffff' }
+    ];
+    const TEXTURES = ['pautado', 'liso', 'pontilhado'];
+    const CITIES = ['São Paulo', 'Rio de Janeiro', 'Belo Horizonte', 'Salvador', 'Recife', 'Belém', 'Curitiba', 'Porto Alegre'];
+    const pen = PENS[st.pen || 0];
+    const tone = PAPERS[st.paper || 0];
+    const tex = st.texture || 0;
+    const now = new Date();
+    const months = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
+    const dd = String(now.getDate()).padStart(2, '0');
+    const hour = now.getHours() + 'H';
+    const text = st.text || '';
+    const len = text.length;
+    let paperTexture = 'none';
+    let paperSize = 'auto';
+    if (tex === 0) {
+      paperTexture = 'repeating-linear-gradient(to bottom, transparent 0px, transparent 35px, ' + tone.rule + ' 35px, ' + tone.rule + ' 36px)';
+    } else if (tex === 2) {
+      paperTexture = 'radial-gradient(circle, ' + tone.rule + ' 1.4px, transparent 1.6px)';
+      paperSize = '18px 18px';
+    }
+    const left = MAX - len;
+    const writing = st.phase !== 'sent';
+    return {
+      pens: PENS.map((p, i) => ({
+        name: p.name, hint: p.hint, family: p.family, pickSize: p.pickSize,
+        selected: i === (st.pen || 0) ? 'true' : 'false',
+        border: i === (st.pen || 0) ? '2px solid #c23b32' : '1.5px solid #e8d5c6',
+        bg: i === (st.pen || 0) ? '#fffaf4' : 'transparent',
+        pick: () => this.update({ pen: i })
+      })),
+      papers: PAPERS.map((c, i) => ({
+        label: 'Papel ' + c.label.toLowerCase(), bg: c.bg,
+        selected: i === (st.paper || 0) ? 'true' : 'false',
+        ring: i === (st.paper || 0) ? '0 0 0 2px #fbf3ea, 0 0 0 4px #3a2620' : 'inset 0 0 0 1px rgba(58,38,32,0.18)',
+        pick: () => this.update({ paper: i })
+      })),
+      paperName: tone.label,
+      textures: TEXTURES.map((name, i) => ({
+        name,
+        selected: i === tex ? 'true' : 'false',
+        bg: i === tex ? '#fffaf4' : 'transparent',
+        shadow: i === tex ? '0 1px 2px rgba(58,38,32,0.12)' : 'none',
+        pick: () => this.update({ texture: i })
+      })),
+      cities: CITIES.map((name) => ({ name })),
+      city: st.city || 'São Paulo',
+      onCity: (e) => this.update({ city: e.target.value }),
+      text,
+      max: MAX,
+      onText: (e) => this.update({ text: String(e.target.value || '').slice(0, MAX) }),
+      lengthHint: len === 0 ? 'Até ' + MAX + ' caracteres. Uma carta curta também é uma carta.' : (left > 80 ? 'Ainda cabe bastante coisa.' : 'Cabem só mais ' + left + ' caracteres.'),
+      empty: len === 0 && !st.interim,
+      hasInterim: !!st.interim,
+      interimText: (len ? ' ' : '') + (st.interim || ''),
+      listening: !!st.listening,
+      toggleMic: () => this.toggleMic(),
+      micPressed: st.listening ? 'true' : 'false',
+      micLabel: st.listening ? 'Parar de ditar' : 'Ditar',
+      micBg: st.listening ? '#3a2620' : 'transparent',
+      micFg: st.listening ? '#ffffff' : '#3a2620',
+      micBorder: st.listening ? '#3a2620' : '#a88676',
+      micBars: Array.from({ length: 20 }, (_, i) => ({
+        h: Math.round(6 + 18 * Math.pow(Math.sin(Math.PI * i / 19), 1.2)) + 'px',
+        dur: (0.55 + ((i * 37) % 10) / 14).toFixed(2) + 's',
+        delay: (-((i * 53) % 10) / 9).toFixed(2) + 's'
+      })),
+      hasMicMsg: !!st.micMsg,
+      micMsg: st.micMsg || '',
+      hasDraft: !!st.savedAt && len > 0,
+      saveColor: st.storeOk === false ? '#c23b32' : (st.savedAt ? '#3f6b57' : '#7a5a4e'),
+      saveStatus: st.storeOk === false ? 'Não deu pra salvar o rascunho neste navegador.'
+        : st.saving ? 'Salvando rascunho…'
+        : st.savedAt ? (st.restored ? 'Rascunho recuperado — você parou aqui às ' + st.savedAt + '.' : 'Rascunho salvo às ' + st.savedAt + '.')
+        : 'Seu rascunho se salva sozinho enquanto você escreve.',
+      discard: () => { this.clearDraft(); this.setState({ text: '' }); },
+      hasText: len > 0,
+      pen,
+      tone,
+      paperTexture,
+      paperSize,
+      postmark: ((st.city || 'São Paulo') + ' · ' + hour).toUpperCase(),
+      date: dd + ' ' + months[now.getMonth()] + ' ' + now.getFullYear(),
+      signature: '— alguém de ' + (st.city || 'São Paulo'),
+      previewLabel: st.phase === 'sending' ? 'FECHANDO O ENVELOPE…' : (writing ? 'SUA CARTA, EM TEMPO REAL' : 'ENVIADA'),
+      writing,
+      sent: !writing,
+      sheetAnim: st.phase === 'sending' ? 'lc-into-envelope 700ms cubic-bezier(.4,0,.2,1) forwards' : 'none',
+      cantSend: len === 0 || st.phase === 'sending',
+      sendOpacity: len === 0 ? 0.45 : 1,
+      sendCursor: len === 0 ? 'not-allowed' : 'pointer',
+      send: () => {
+        if (!text.trim()) return;
+        this.stopMic();
+        this.clearDraft();
+        this.setState({ phase: 'sending' });
+        clearTimeout(this.timer);
+        this.timer = setTimeout(() => this.setState({ phase: 'sent' }), 700);
+      },
+      again: () => this.setState({ text: '', phase: 'writing' })
+    };
+  }
+}
+</script>
+</body>
+</html>

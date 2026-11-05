@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>letterclub — início</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Work+Sans:wght@400;500&amp;family=IBM+Plex+Mono:wght@500&amp;family=Homemade+Apple&amp;family=La+Belle+Aurore&amp;family=Caveat:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#c23b32}
+a{color:#ffffff}a:hover{color:#fbf3ea}
+:focus-visible{outline:2px solid #ffffff;outline-offset:2px}
+.lc-paper :focus-visible{outline-color:#3a2620}
+.lc-paper a{color:#c23b32}.lc-paper a:hover{color:#3a2620}
+.lc-pill{transition:transform 300ms ease-out, background-color 300ms ease-out}
+.lc-pill:hover{transform:translateY(-2px)}
+@keyframes lc-orb{from{transform:rotateX(-22deg) rotateZ(10deg) rotateY(0deg)}to{transform:rotateX(-22deg) rotateZ(10deg) rotateY(360deg)}}
+@keyframes lc-breathe{from{transform:scale(.86)}to{transform:scale(1.05)}}
+@keyframes lc-fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes lc-rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+@keyframes lc-fade-in{from{opacity:0}to{opacity:1}}
+@keyframes lc-fade-out{to{opacity:0;visibility:hidden}}
+@keyframes lc-wave{from{transform:scaleY(.18)}to{transform:scaleY(1)}}
+@keyframes lc-float{from{transform:translateY(0)}to{transform:translateY(-12px)}}
+@keyframes lc-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes lc-marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes lc-grain{0%{transform:translate(0,0)}25%{transform:translate(-2%,1%)}50%{transform:translate(1%,-2%)}75%{transform:translate(-1%,2%)}100%{transform:translate(0,0)}}
+@media (prefers-reduced-motion: reduce){
+*{animation-duration:1ms !important;animation-iteration-count:1 !important;animation-delay:0ms !important;transition:none !important}
+}
+</style>
+</helmet>
+<div style="position: relative; overflow: hidden; background: #c23b32; color: #ffffff; font-family: 'Work Sans', 'Helvetica Neue', Arial, sans-serif;">
+
+<sc-if value="{{loading}}" hint-placeholder-val="{{ false }}">
+<div role="status" aria-label="Abrindo o letterclub" style="position: fixed; inset: 0; z-index: 30; background: #c23b32; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 48px; animation: lc-fade-out 700ms ease-in {{outDelay}} forwards;">
+<div aria-hidden="true" style="width: 220px; height: 220px; perspective: 900px; animation: lc-breathe 2.6s ease-in-out infinite alternate;">
+<div style="position: relative; width: 100%; height: 100%; transform-style: preserve-3d; animation: lc-orb 6s linear infinite;">
+<div style="position: absolute; inset: 0; border: 1.5px solid rgba(255,255,255,0.95); border-radius: 50%; transform: rotateY(0deg);"></div>
+<div style="position: absolute; inset: 0; border: 1.5px solid rgba(255,255,255,0.9); border-radius: 50%; transform: rotateY(22.5deg);"></div>
+<div style="position: absolute; inset: 0; border: 1.5px solid rgba(255,255,255,0.85); border-radius: 50%; transform: rotateY(45deg);"></div>
+<div style="position: absolute; inset: 0; border: 1.5px solid rgba(255,255,255,0.8); border-radius: 50%; transform: rotateY(67.5deg);"></div>
+<div style="position: absolute; inset: 0; border: 1.5px solid rgba(255,255,255,0.95); border-radius: 50%; transform: rotateY(90deg);"></div>
+<div style="position: absolute; inset: 0; border: 1.5px solid rgba(255,255,255,0.8); border-radius: 50%; transform: rotateY(112.5deg);"></div>
+<div style="position: absolute; inset: 0; border: 1.5px solid rgba(255,255,255,0.85); border-radius: 50%; transform: rotateY(135deg);"></div>
+<div style="position: absolute; inset: 0; border: 1.5px solid rgba(255,255,255,0.9); border-radius: 50%; transform: rotateY(157.5deg);"></div>
+<div style="position: absolute; inset: 0; border: 1.5px solid rgba(255,255,255,0.6); border-radius: 50%; transform: rotateX(90deg);"></div>
+<div style="position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: #ffffff;"></div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 20px; animation: lc-fade-in 900ms ease-out 900ms both;">
+<p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 30px; line-height: 36px; text-align: center;">olá. que bom que você chegou.</p>
+<div style="width: 180px; height: 1px; background: rgba(255,255,255,0.3); overflow: hidden;">
+<div style="width: 100%; height: 100%; background: #ffffff; transform-origin: left center; animation: lc-fill {{fillDur}} cubic-bezier(.4,0,.2,1) forwards;"></div>
+</div>
+<p style="margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500;">ABRINDO A CAIXA DE CORREIO</p>
+</div>
+</div>
+</sc-if>
+
+<section aria-label="Abertura" style="position: relative; min-height: 100vh; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden;">
+<svg aria-hidden="true" width="100%" height="100%" style="position: absolute; inset: -10%; width: 120%; height: 120%; opacity: 0.16; mix-blend-mode: overlay; pointer-events: none; animation: lc-grain 1.2s steps(4) infinite;"><filter id="lc-noise"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"></feTurbulence><feColorMatrix type="saturate" values="0"></feColorMatrix></filter><rect width="100%" height="100%" filter="url(#lc-noise)"></rect></svg>
+
+<header style="position: relative; z-index: 2; width: 100%; max-width: 1440px; margin: 0 auto; box-sizing: border-box; padding: 28px 5%; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;">
+<a href="Main.dc.html" style="font-family: 'Instrument Serif', Georgia, serif; font-size: 34px; line-height: 1; letter-spacing: -0.01em; text-decoration: none;">letterclub</a>
+<nav aria-label="Principal" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; font-size: 14px; line-height: 20px; font-weight: 500;">
+<a href="Cartas.dc.html" style="text-decoration: none; padding: 12px 0;">cartas</a>
+<a href="Mural.dc.html" style="text-decoration: none; padding: 12px 0;">mural</a>
+<a href="Clube.dc.html" style="text-decoration: none; padding: 12px 0;">o clube</a>
+<a href="Caixa.dc.html" style="text-decoration: none; padding: 12px 0;">sua caixa</a>
+<a href="Escrever.dc.html" class="lc-pill" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 22px; border-radius: 999px; background: #fbf3ea; color: #c23b32; text-decoration: none;">Escrever uma carta</a>
+</nav>
+</header>
+
+<div style="position: relative; z-index: 2; flex: 1 1 auto; width: 100%; max-width: 1280px; margin: 0 auto; box-sizing: border-box; padding: 0 5% 32px; display: flex; flex-direction: column; align-items: center;">
+
+<div style="position: relative; width: 100%; padding-top: 24px; display: flex; flex-direction: column; align-items: center; gap: clamp(40px, 5vw, 64px);">
+<h1 style="margin: 0; display: flex; flex-direction: column; align-items: center; text-align: center; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400;">
+<span style="display: block; font-size: clamp(88px, 13vw, 200px); line-height: 0.85; letter-spacing: -0.045em; animation: lc-rise 1100ms cubic-bezier(.22,.61,.36,1) {{d1}} both;">escreva</span>
+<span style="display: block; font-style: italic; color: #f6d9cf; font-size: clamp(56px, 7.5vw, 120px); line-height: 1; letter-spacing: -0.03em; animation: lc-rise 1100ms cubic-bezier(.22,.61,.36,1) {{d2}} both;">para alguém</span>
+<span style="display: block; margin-top: 20px; font-size: clamp(28px, 3vw, 44px); line-height: 1.1; letter-spacing: -0.01em; animation: lc-rise 1100ms cubic-bezier(.22,.61,.36,1) {{d3}} both;">que você nunca vai conhecer.</span>
+</h1>
+
+<div aria-hidden="true" style="position: relative; width: min(500px, 80vw); aspect-ratio: 540 / 600; animation: lc-rise 1200ms cubic-bezier(.22,.61,.36,1) {{d2}} both;">
+<div style="position: absolute; left: 10%; top: 2%; width: 62%; z-index: 1; animation: lc-float 7s ease-in-out infinite alternate;">
+<div style="box-sizing: border-box; aspect-ratio: 3 / 3.8; overflow: hidden; padding: 28px 26px; border-radius: 10px; background: #fffaf4; color: #3a2620; box-shadow: 0 2px 4px rgba(58,38,32,0.10), 0 18px 40px rgba(58,38,32,0.22); transform: rotate(-7deg); display: flex; flex-direction: column; gap: 12px;">
+<p style="margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500; color: #7a5a4e;">RECIFE · 6H</p>
+<p style="margin: 0; font-family: 'La Belle Aurore', 'Segoe Script', cursive; font-size: 26px; line-height: 36px; background-image: repeating-linear-gradient(to bottom, transparent 0px, transparent 35px, #e8d5c6 35px, #e8d5c6 36px);">o mar continua aqui. ele espera sem pressa nenhuma.</p>
+<p style="margin: 0; font-family: 'Homemade Apple', 'Segoe Script', cursive; font-size: 18px; line-height: 36px; color: #c23b32;">— alguém de Recife</p>
+</div>
+</div>
+<div style="position: absolute; left: 2%; top: 40%; width: 88%; z-index: 2; animation: lc-float 8s ease-in-out -3s infinite alternate;">
+<div style="position: relative; aspect-ratio: 16 / 10; border-radius: 10px; background: #f2b8a2; box-shadow: 0 2px 4px rgba(58,38,32,0.10), 0 18px 40px rgba(58,38,32,0.22); transform: rotate(5deg); overflow: hidden;">
+<svg viewBox="0 0 160 100" preserveAspectRatio="none" style="position: absolute; inset: 0; width: 100%; height: 100%;"><path d="M0 0 L80 58 L160 0" fill="none" stroke="rgba(58,38,32,0.28)" stroke-width="0.8"></path><path d="M0 100 L62 46 M160 100 L98 46" fill="none" stroke="rgba(58,38,32,0.16)" stroke-width="0.8"></path></svg>
+<div style="position: absolute; left: 50%; top: 58%; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; background: #c23b32; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(58,38,32,0.25);">
+<span style="font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 34px; line-height: 1; color: #fbf3ea;">l</span>
+</div>
+<div style="position: absolute; right: 6%; top: 10%;"><dc-import name="Selo" kind="sol" hint-size="50px,50px"></dc-import></div>
+<p style="position: absolute; left: 7%; bottom: 9%; margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500; color: #3a2620;">PARA: ALGUÉM · QUALQUER LUGAR</p>
+</div>
+</div>
+<div style="position: absolute; right: -2%; top: 24%; z-index: 3; transform: rotate(9deg); display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 999px; background: #3f6b57; color: #fbf3ea; box-shadow: 0 10px 24px rgba(58,38,32,0.25);">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+<span style="font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500;">ENTREGUE · 2 DIAS</span>
+</div>
+<div style="position: absolute; left: -4%; bottom: 2%; z-index: 3; width: 28%; aspect-ratio: 1 / 1;">
+<svg viewBox="0 0 160 160" style="position: absolute; inset: 0; width: 100%; height: 100%; animation: lc-spin 22s linear infinite;"><defs><path id="lc-badge-path" d="M80,80 m-60,0 a60,60 0 1,1 120,0 a60,60 0 1,1 -120,0"></path></defs><circle cx="80" cy="80" r="80" fill="#d9a441"></circle><text font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="500" letter-spacing="3" fill="#3a2620"><textPath href="#lc-badge-path">ESCRITO À MÃO · ENTREGUE DEVAGAR · </textPath></text></svg>
+<span style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: clamp(18px, 2.2vw, 30px); line-height: 1; color: #3a2620;">à mão</span>
+</div>
+<div style="position: absolute; right: 8%; bottom: 6%; z-index: 3; width: 22px; height: 22px; border-radius: 50%; background: #f6d9cf;"></div>
+<div style="position: absolute; right: 18%; top: 4%; z-index: 0; width: 12px; height: 12px; border-radius: 50%; background: #d9a441;"></div>
+</div>
+</div>
+
+
+<div style="margin-top: 32px; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; animation: lc-rise 1000ms cubic-bezier(.22,.61,.36,1) {{d3}} both;">
+<a href="Escrever.dc.html" class="lc-pill" style="display: inline-flex; align-items: center; min-height: 52px; padding: 0 28px; border-radius: 999px; background: #fbf3ea; color: #c23b32; font-size: 14px; line-height: 20px; font-weight: 500; text-decoration: none;">Escrever uma carta</a>
+<a href="#cartas" class="lc-pill" style="display: inline-flex; align-items: center; min-height: 52px; padding: 0 28px; border-radius: 999px; border: 1.5px solid rgba(255,255,255,0.85); font-size: 14px; line-height: 20px; font-weight: 500; text-decoration: none;">Ler cartas</a>
+</div>
+
+<div style="margin-top: 56px; width: 100%; box-sizing: border-box; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.35); display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.22em; font-weight: 500;">
+<div aria-hidden="true" style="height: 28px; display: flex; align-items: center; gap: 3px;">
+<sc-for list="{{bars}}" as="b" hint-placeholder-count="28">
+<span style="display: block; width: 2px; height: {{b.h}}; border-radius: 999px; background: #f2b8a2; opacity: {{b.o}}; transform-origin: center; animation: lc-wave {{b.dur}} ease-in-out {{b.delay}} infinite alternate;"></span>
+</sc-for>
+</div>
+<p style="margin: 0;">UM CLUBE DE CARTAS ANÔNIMAS · ESCRITO POR VOCÊ · LIDO POR ALGUÉM · ENTREGUE EM DOIS DIAS</p>
+<p style="margin: 0;">DIREÇÃO: VOCÊ · CARTAS: ANÔNIMAS · INSPIRADO EM HER (2013)</p>
+</div>
+</div>
+</section>
+
+<section id="cartas" class="lc-paper" aria-label="Cartas" style="background: #fbf3ea; color: #3a2620; padding-top: 72px;">
+<dc-import name="CartasSecao" hint-size="100%,860px"></dc-import>
+</section>
+
+<section aria-label="Trechos de cartas" class="lc-paper" style="background: #fbf3ea; color: #3a2620; padding: 40px 0; overflow: hidden; border-bottom: 1px solid #e8d5c6;">
+<div style="display: flex; width: max-content; animation: lc-marquee 70s linear infinite;">
+<sc-for list="{{marquee}}" as="m" hint-placeholder-count="12">
+<div style="display: flex; align-items: center; gap: 28px; padding: 0 28px; white-space: nowrap;">
+<span style="font-family: {{m.family}}; font-size: {{m.size}}; line-height: 36px;">{{m.text}}</span>
+<span style="font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500; color: #c23b32;">{{m.stamp}}</span>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section id="como" class="lc-paper" aria-labelledby="como-titulo" style="background: #fbf3ea; color: #3a2620; padding: 120px 5%;">
+<div style="max-width: 1280px; margin: 0 auto; display: flex; flex-direction: column; gap: 48px;">
+<div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px;">
+<h2 id="como-titulo" style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: clamp(44px, 5vw, 72px); line-height: 1; letter-spacing: -0.02em;">Devagar é o ponto.</h2>
+<p style="margin: 0; max-width: 400px; font-size: 17px; line-height: 27px; color: #7a5a4e;">Nada de notificação, nada de pressa. Uma carta por vez.</p>
+</div>
+<div style="display: flex; flex-direction: column; border-top: 1px solid #a88676;">
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 16px 40px; padding: 32px 0; border-bottom: 1px solid #e8d5c6;">
+<p style="margin: 0; flex: 0 0 120px; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500; color: #c23b32;">01 · ESCREVA</p>
+<h3 style="margin: 0; flex: 1 1 320px; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; font-size: 44px; line-height: 48px;">com calma, à mão.</h3>
+<p style="margin: 0; flex: 1 1 320px; font-size: 17px; line-height: 27px; color: #7a5a4e;">Escolha uma das três canetas e escreva para alguém. Sem nome, sem foto, só palavras.</p>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 16px 40px; padding: 32px 0; border-bottom: 1px solid #e8d5c6;">
+<p style="margin: 0; flex: 0 0 120px; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500; color: #c23b32;">02 · ENVIE</p>
+<h3 style="margin: 0; flex: 1 1 320px; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; font-size: 44px; line-height: 48px;">ela ganha um selo.</h3>
+<p style="margin: 0; flex: 1 1 320px; font-size: 17px; line-height: 27px; color: #7a5a4e;">Sai com o carimbo da sua cidade e da hora em que foi escrita. É essa a sua assinatura.</p>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 16px 40px; padding: 32px 0; border-bottom: 1px solid #e8d5c6;">
+<p style="margin: 0; flex: 0 0 120px; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500; color: #c23b32;">03 · ESPERE</p>
+<h3 style="margin: 0; flex: 1 1 320px; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; font-size: 44px; line-height: 48px;">e ela chega devagar.</h3>
+<p style="margin: 0; flex: 1 1 320px; font-size: 17px; line-height: 27px; color: #7a5a4e;">Uma carta leva dois dias pra chegar. De propósito. Enquanto isso, outra pode estar vindo pra você.</p>
+</div>
+</div>
+</div>
+</section>
+
+<section aria-labelledby="cta-titulo" style="position: relative; overflow: hidden; padding: 140px 5% 120px; display: flex; flex-direction: column; align-items: center; gap: 36px; text-align: center;">
+<div aria-hidden="true" style="width: 120px; height: 120px; perspective: 700px; animation: lc-breathe 3.2s ease-in-out infinite alternate;">
+<div style="position: relative; width: 100%; height: 100%; transform-style: preserve-3d; animation: lc-orb 12s linear infinite;">
+<div style="position: absolute; inset: 0; border: 1px solid rgba(255,255,255,0.8); border-radius: 50%; transform: rotateY(0deg);"></div>
+<div style="position: absolute; inset: 0; border: 1px solid rgba(255,255,255,0.6); border-radius: 50%; transform: rotateY(30deg);"></div>
+<div style="position: absolute; inset: 0; border: 1px solid rgba(255,255,255,0.6); border-radius: 50%; transform: rotateY(60deg);"></div>
+<div style="position: absolute; inset: 0; border: 1px solid rgba(255,255,255,0.8); border-radius: 50%; transform: rotateY(90deg);"></div>
+<div style="position: absolute; inset: 0; border: 1px solid rgba(255,255,255,0.6); border-radius: 50%; transform: rotateY(120deg);"></div>
+<div style="position: absolute; inset: 0; border: 1px solid rgba(255,255,255,0.6); border-radius: 50%; transform: rotateY(150deg);"></div>
+</div>
+</div>
+<h2 id="cta-titulo" style="margin: 0; max-width: 900px; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: clamp(56px, 7vw, 112px); line-height: 0.95; letter-spacing: -0.03em;">Escreva para alguém.</h2>
+<a href="Escrever.dc.html" class="lc-pill" style="display: inline-flex; align-items: center; min-height: 56px; padding: 0 32px; border-radius: 999px; background: #fbf3ea; color: #c23b32; font-size: 14px; line-height: 20px; font-weight: 500; text-decoration: none;">Escrever uma carta</a>
+</section>
+
+<footer style="max-width: 1440px; margin: 0 auto; box-sizing: border-box; padding: 24px 5% 40px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; border-top: 1px solid rgba(255,255,255,0.35);">
+<p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 24px; line-height: 1;">letterclub</p>
+<p style="margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500;">CARTAS ANÔNIMAS, ESCRITAS COM CALMA</p>
+<button type="button" onClick="{{replay}}" style="min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1.5px solid rgba(255,255,255,0.85); background: transparent; color: #ffffff; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer;">Rever a abertura</button>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"showIntro":{"editor":"boolean","default":true},"introSeconds":{"editor":"range","default":4.5,"min":1.5,"max":10,"step":0.5,"unit":"s"},"$preview":{"width":1440,"height":3100}}'>
+class Component extends DCLogic {
+  state = { loading: true };
+  componentDidMount() { this.start(); }
+  componentWillUnmount() { clearTimeout(this.timer); }
+  secs() {
+    const v = Number(this.props.introSeconds ?? 4.5);
+    return Math.min(10, Math.max(1.5, isNaN(v) ? 4.5 : v));
+  }
+  start() {
+    clearTimeout(this.timer);
+    this.setState({ loading: true });
+    this.timer = setTimeout(() => this.setState({ loading: false }), this.secs() * 1000);
+  }
+  rand(seed) {
+    const x = Math.sin(seed * 12.9898) * 43758.5453;
+    return x - Math.floor(x);
+  }
+  renderVals() {
+    const s = this.secs();
+    const intro = (this.props.showIntro ?? true);
+    const base = intro ? Math.max(0, s - 0.5) : 0;
+    const n = 28;
+    const bars = [];
+    for (let i = 0; i < n; i++) {
+      const env = Math.pow(Math.sin(Math.PI * i / (n - 1)), 1.2);
+      const h = Math.round(4 + 24 * env * (0.55 + 0.45 * this.rand(i + 1)));
+      bars.push({
+        h: h + 'px',
+        o: (0.55 + 0.45 * env).toFixed(2),
+        dur: (0.7 + 0.8 * this.rand(i + 50)).toFixed(2) + 's',
+        delay: (-1 * this.rand(i + 99) * 1.5).toFixed(2) + 's'
+      });
+    }
+    const pens = [
+      { family: "'Homemade Apple', 'Segoe Script', cursive", size: '19px' },
+      { family: "'La Belle Aurore', 'Segoe Script', cursive", size: '28px' },
+      { family: "'Caveat', 'Segoe Print', cursive", size: '28px' }
+    ];
+    const lines = [
+      ['hoje a cidade estava barulhenta demais e eu pensei em você', 'SÃO PAULO · 23H'],
+      ['o mar continua aqui. ele espera sem pressa', 'RECIFE · 6H'],
+      ['toma um chá por mim', 'PORTO ALEGRE · 19H'],
+      ['dá pra marcar encontro com a chuva', 'BELÉM · 14H'],
+      ['alguém acordado pensou em você', 'LISBOA · 2H'],
+      ['ficou feio e muito gostoso', 'BELO HORIZONTE · 17H']
+    ];
+    const once = lines.map((l, i) => ({ text: l[0], stamp: l[1], family: pens[i % 3].family, size: pens[i % 3].size }));
+    return {
+      loading: (this.props.showIntro ?? true) && !!(this.state && this.state.loading),
+      fillDur: s + 's',
+      outDelay: Math.max(0, s - 0.7) + 's',
+      replay: () => this.start(),
+      d1: base.toFixed(2) + 's',
+      d2: (base + 0.15).toFixed(2) + 's',
+      d3: (base + 0.35).toFixed(2) + 's',
+      bars,
+      marquee: once.concat(once)
+    };
+  }
+}
+</script>
+</body>
+</html>
