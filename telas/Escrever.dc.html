@@ -206,7 +206,7 @@ class Component extends DCLogic {
     return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
   }
   update(patch) {
-    this.setState(Object.assign({}, patch, { restored: false }), () => this.queueSave());
+    this.setState(Object.assign({}, patch, { restored: false, sendError: '' }), () => this.queueSave());
   }
   queueSave() {
     clearTimeout(this.saveTimer);
@@ -356,8 +356,9 @@ class Component extends DCLogic {
       hasMicMsg: !!st.micMsg,
       micMsg: st.micMsg || '',
       hasDraft: !!st.savedAt && len > 0,
-      saveColor: st.storeOk === false ? '#c23b32' : (st.savedAt ? '#3f6b57' : '#7a5a4e'),
-      saveStatus: st.storeOk === false ? 'Não deu pra salvar o rascunho neste navegador.'
+      saveColor: st.sendError || st.storeOk === false ? '#c23b32' : (st.savedAt ? '#3f6b57' : '#7a5a4e'),
+      saveStatus: st.sendError ? st.sendError
+        : st.storeOk === false ? 'Não deu pra salvar o rascunho neste navegador.'
         : st.saving ? 'Salvando rascunho…'
         : st.savedAt ? (st.restored ? 'Rascunho recuperado — você parou aqui às ' + st.savedAt + '.' : 'Rascunho salvo às ' + st.savedAt + '.')
         : 'Seu rascunho se salva sozinho enquanto você escreve.',
@@ -378,14 +379,19 @@ class Component extends DCLogic {
       sendOpacity: len === 0 ? 0.45 : 1,
       sendCursor: len === 0 ? 'not-allowed' : 'pointer',
       send: () => {
-        if (!text.trim()) return;
+        if (!text.trim() || st.phase === 'sending') return;
         this.stopMic();
-        this.clearDraft();
-        this.setState({ phase: 'sending' });
+        this.setState({ phase: 'sending', sendError: '' });
         clearTimeout(this.timer);
-        this.timer = setTimeout(() => this.setState({ phase: 'sent' }), 700);
+        const envelope = new Promise((r) => { this.timer = setTimeout(r, 700); });
+        const req = this.api('POST', '/cartas', { text, pen: st.pen || 0, paper: st.paper || 0, texture: tex, city: st.city || 'São Paulo', hour: new Date().getHours() });
+        // o rascunho só some depois que o servidor confirmou
+        Promise.all([req, envelope]).then(
+          () => { this.clearDraft(); this.setState({ phase: 'sent' }); },
+          (e) => this.setState({ phase: 'writing', sendError: e.status === 429 ? e.message : 'Não deu pra enviar agora. Sua carta continua aqui — tente de novo.' })
+        );
       },
-      again: () => this.setState({ text: '', phase: 'writing' })
+      again: () => this.setState({ text: '', phase: 'writing', sendError: '' })
     };
   }
 }

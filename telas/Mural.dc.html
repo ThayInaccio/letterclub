@@ -67,7 +67,7 @@ só minhas favoritas
 
 <div style="columns: 3 300px; column-gap: 28px;">
 <sc-for list="{{letters}}" as="l" hint-placeholder-count="12">
-<article class="lc-card" aria-label="{{l.aria}}" style="break-inside: avoid; margin: 0 0 28px; box-sizing: border-box; padding: 28px 28px 16px; border-radius: 10px; background: {{l.bg}}; color: {{l.fg}}; box-shadow: 0 1px 2px rgba(58,38,32,0.08), 0 10px 28px rgba(58,38,32,0.10); display: flex; flex-direction: column; gap: 14px; transform: rotate({{l.tilt}}); animation: lc-rise 600ms cubic-bezier(.22,.61,.36,1) {{l.delay}} both;">
+<article id="{{l.anchor}}" class="lc-card" aria-label="{{l.aria}}" style="break-inside: avoid; margin: 0 0 28px; box-sizing: border-box; padding: 28px 28px 16px; border-radius: 10px; background: {{l.bg}}; color: {{l.fg}}; box-shadow: 0 1px 2px rgba(58,38,32,0.08), 0 10px 28px rgba(58,38,32,0.10); display: flex; flex-direction: column; gap: 14px; transform: rotate({{l.tilt}}); animation: lc-rise 600ms cubic-bezier(.22,.61,.36,1) {{l.delay}} both;">
 <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;">
 <div style="display: flex; flex-direction: column; gap: 2px;">
 <p style="margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500; color: {{l.muted}};">{{l.postmark}}</p>
@@ -157,7 +157,15 @@ Compartilhar
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1600}}'>
 class Component extends DCLogic {
-  state = { favs: {}, popped: null, sort: 0, onlyFavs: false, shareId: null, format: 0, bg: 0, toast: '' };
+  state = { favs: {}, popped: null, sort: 0, onlyFavs: false, shareId: null, format: 0, bg: 0, toast: '', remote: null };
+  componentDidMount() {
+    // o HTML pré-renderizado traz o acervo; aqui entram as cartas e favoritos reais
+    this.api('GET', '/mural').then((d) => {
+      const favs = {};
+      d.letters.forEach((l) => { if (l.fav) favs[l.id] = true; });
+      this.setState({ remote: d.letters, favs });
+    }, () => {});
+  }
   componentWillUnmount() { clearTimeout(this.toastTimer); }
   say(msg) {
     clearTimeout(this.toastTimer);
@@ -178,6 +186,12 @@ class Component extends DCLogic {
       pessego: { bg: '#f2b8a2', fg: '#3a2620', muted: '#3a2620', rule: 'rgba(58,38,32,0.18)', sig: '#3a2620' },
       blush: { bg: '#f6d9cf', fg: '#3a2620', muted: '#7a5a4e', rule: 'rgba(58,38,32,0.16)', sig: '#3a2620' }
     };
+    const R = this.state && this.state.remote;
+    if (R) {
+      const pens = [P.cursiva, P.fina, P.forma];
+      const tones = [T.papel, T.blush, T.pessego, T.ocre, T.salvia, T.coral]; // ordem do Escrever
+      return R.map((l) => Object.assign({}, l, { pen: pens[l.pen] || P.cursiva, tone: tones[l.paper] || T.papel }));
+    }
     const S = { a1: 'cidade', a2: 'sol', a3: 'cha', a4: 'chuva', a5: 'lua', a6: 'pao', a7: 'mar', a8: 'frio', a9: 'riso', a10: 'rio', a11: 'estrela', a12: 'ponte' };
     return this.withStamps(S, [
       { id: 'a1', order: 1, saves: 41, city: 'São Paulo', hour: '23h', date: '05 NOV 2026', pen: P.cursiva, tone: T.papel, text: 'Querida pessoa que eu não conheço, hoje a cidade estava barulhenta demais e eu pensei em você, que talvez também precise de um pouco de silêncio.' },
@@ -206,13 +220,15 @@ class Component extends DCLogic {
     let list = all.slice();
     if (sort === 0) list.sort((a, b) => a.order - b.order);
     if (sort === 1) list.sort((a, b) => b.order - a.order);
-    if (sort === 2) list.sort((a, b) => (b.saves + (favs[b.id] ? 1 : 0)) - (a.saves + (favs[a.id] ? 1 : 0)));
+    const bonus = (l) => (!st.remote && favs[l.id] ? 1 : 0); // do servidor, saves já conta o seu favorito
+    if (sort === 2) list.sort((a, b) => (b.saves + bonus(b)) - (a.saves + bonus(a)));
     if (st.onlyFavs) list = list.filter((l) => favs[l.id]);
     const tilts = ['-0.6deg', '0.5deg', '-0.3deg', '0.7deg', '0deg', '-0.5deg'];
     const letters = list.map((l, i) => {
       const on = !!favs[l.id];
       return {
         stamp: l.stamp,
+        anchor: 'carta-' + l.id,
         aria: 'Carta de ' + l.city + ', ' + l.date,
         postmark: (l.city + ' · ' + l.hour).toUpperCase(),
         date: l.date,
@@ -230,6 +246,16 @@ class Component extends DCLogic {
           const next = Object.assign({}, (this.state && this.state.favs) || {});
           if (next[l.id]) delete next[l.id]; else next[l.id] = true;
           this.setState({ favs: next, popped: next[l.id] ? l.id : null });
+          if (!(this.state && this.state.remote)) return;
+          this.api('POST', '/mural/' + l.id + '/favorito', { fav: !!next[l.id] }).then((r) => {
+            const remote = ((this.state && this.state.remote) || []).map((x) => (x.id === l.id ? Object.assign({}, x, { saves: r.saves }) : x));
+            this.setState({ remote });
+          }, () => {
+            const back = Object.assign({}, (this.state && this.state.favs) || {});
+            if (next[l.id]) delete back[l.id]; else back[l.id] = true;
+            this.setState({ favs: back, popped: null });
+            this.say('Não deu pra guardar agora. Tente de novo.');
+          });
         },
         share: () => this.setState({ shareId: l.id, toast: '' })
       };
@@ -289,8 +315,9 @@ class Component extends DCLogic {
       download: () => this.say('Imagem salva. É só postar onde quiser.'),
       whatsapp: () => this.say('Abrindo o WhatsApp com a imagem e o link da carta.'),
       copyLink: () => {
-        try { if (navigator.clipboard) navigator.clipboard.writeText('letterclub/carta/' + shared.id); } catch (e) {}
-        this.say('Link copiado.');
+        const url = window.location.origin + '/mural/#carta-' + shared.id;
+        const fail = () => this.say('Não deu pra copiar. O link é ' + url);
+        try { navigator.clipboard.writeText(url).then(() => this.say('Link copiado.'), fail); } catch (e) { fail(); }
       },
       toast: st.toast || ''
     };

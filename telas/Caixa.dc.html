@@ -163,8 +163,23 @@ Responder
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1200}}'>
 class Component extends DCLogic {
-  state = { tab: 0, opened: { r3: true, r4: true }, reading: null, kept: { r3: true }, published: { s2: true }, draft: null };
-  componentDidMount() { this.loadDraft(); }
+  state = { tab: 0, opened: {}, reading: null, kept: {}, published: {}, draft: null, inbox: null, sentList: null, failed: false };
+  componentDidMount() { this.loadDraft(); this.load(); }
+  load() {
+    this.api('GET', '/caixa').then((d) => {
+      const opened = {}; const kept = {}; const published = {};
+      d.inbox.forEach((r) => { if (r.opened) opened[r.id] = true; if (r.kept) kept[r.id] = true; });
+      d.sent.forEach((x) => { if (x.published) published[x.id] = true; });
+      this.setState({ inbox: d.inbox, sentList: d.sent, opened, kept, published, failed: false });
+    }, () => this.setState({ failed: true }));
+  }
+  // muda na hora; se o servidor recusar, volta como estava
+  flip(key, id, path, field) {
+    const prev = (this.state && this.state[key]) || {};
+    const next = Object.assign({}, prev, { [id]: !prev[id] });
+    this.setState({ [key]: next });
+    this.api('POST', path, { [field]: !!next[id] }).catch(() => this.setState({ [key]: prev }));
+  }
   loadDraft() {
     try {
       const raw = window.localStorage.getItem('letterclub:rascunho');
@@ -190,16 +205,16 @@ class Component extends DCLogic {
     ];
   }
   inboxData() {
-    return [
-      { id: 'r1', city: 'Curitiba', hour: '22h', date: '05 NOV 2026', arrived: 'CHEGOU HOJE', pen: 1, paper: 1, stamp: 'frio', env: '#fffaf4', line: 'rgba(58,38,32,0.25)', ink: '#3a2620',
-        text: 'Hoje o dia foi cinza do começo ao fim. Mas encontrei um café bom e pensei que alguém merecia saber. Esse alguém é você.' },
-      { id: 'r2', city: 'Salvador', hour: '9h', date: '04 NOV 2026', arrived: 'CHEGOU ONTEM', pen: 2, paper: 3, stamp: 'mar', env: '#f2b8a2', line: 'rgba(58,38,32,0.28)', ink: '#3a2620',
-        text: 'Escrevo da varanda, com o barulho do mar de fundo. Não sei o que você está vivendo, mas desejo que hoje tenha um pedaço de calma nele.' },
-      { id: 'r3', city: 'Porto Alegre', hour: '18h', date: '02 NOV 2026', arrived: 'CHEGOU 02 NOV', pen: 0, paper: 0, stamp: 'cha', env: '#d9a441', line: 'rgba(58,38,32,0.3)', ink: '#3a2620',
-        text: 'Obrigada por existir do outro lado desta carta. Às vezes isso basta pra um dia inteiro.' },
-      { id: 'r4', city: 'Belém', hour: '15h', date: '29 OUT 2026', arrived: 'CHEGOU 29 OUT', pen: 2, paper: 4, stamp: 'chuva', env: '#3f6b57', line: 'rgba(251,243,234,0.35)', ink: '#fbf3ea',
-        text: 'Choveu de novo. Fiquei olhando a janela e lembrei que a gente se preocupa demais com coisas que a chuva lava sozinha.' }
+    // envelope de cada carta, a partir do papel (Creme, Blush, Pêssego, Ocre, Sálvia, Coral)
+    const ENV = [
+      { env: '#d9a441', line: 'rgba(58,38,32,0.3)', ink: '#3a2620' },
+      { env: '#fffaf4', line: 'rgba(58,38,32,0.25)', ink: '#3a2620' },
+      { env: '#fffaf4', line: 'rgba(58,38,32,0.25)', ink: '#3a2620' },
+      { env: '#f2b8a2', line: 'rgba(58,38,32,0.28)', ink: '#3a2620' },
+      { env: '#3f6b57', line: 'rgba(251,243,234,0.35)', ink: '#fbf3ea' },
+      { env: '#fffaf4', line: 'rgba(58,38,32,0.25)', ink: '#3a2620' }
     ];
+    return ((this.state && this.state.inbox) || []).map((r) => Object.assign({}, r, ENV[r.paper] || ENV[0]));
   }
   renderVals() {
     const st = this.state || {};
@@ -230,21 +245,19 @@ class Component extends DCLogic {
         excerpt: r.text.slice(0, 40) + '…',
         open: () => {
           const o = Object.assign({}, (this.state && this.state.opened) || {});
+          if (!o[r.id]) this.api('POST', '/cartas/' + r.id + '/abrir').catch(() => {});
           o[r.id] = true;
           this.setState({ opened: o, reading: r.id });
         }
       };
     });
 
-    const cur = inboxRaw.find((r) => r.id === st.reading) || inboxRaw[0];
+    const cur = inboxRaw.find((r) => r.id === st.reading) || inboxRaw[0]
+      || { id: '', city: '', hour: '', date: '', pen: 0, paper: 0, stamp: 'sol', text: '' };
     const ct = T[cur.paper];
     const cp = P[cur.pen];
 
-    const SENT = [
-      { id: 's1', date: '05 NOV', pen: 0, paper: 0, tilt: '-3deg', kind: 'way', text: 'Querida pessoa que eu não conheço, hoje a cidade estava barulhenta demais e eu pensei em você.' },
-      { id: 's2', date: '01 NOV', pen: 1, paper: 5, tilt: '2deg', kind: 'done', text: 'Acordei antes do sol só pra te contar: o mar continua aqui.' },
-      { id: 's3', date: '27 OUT', pen: 2, paper: 3, tilt: '-1deg', kind: 'mail', text: 'Não sei seu nome, mas sei que você chegou até o fim de mais um dia.' }
-    ];
+    const SENT = (st.sentList || []).map((x, i) => Object.assign({}, x, { tilt: ['-3deg', '2deg', '-1deg'][i % 3], kind: x.status }));
     const STATUS = {
       way: { label: 'A caminho · chega em 2 dias', bg: '#f6d9cf', fg: '#3a2620', icon: 'M5 12h11M12 7l5 5-5 5' },
       done: { label: 'Entregue', bg: '#3f6b57', fg: '#fbf3ea', icon: 'M5 12.5l4.5 4.5L19 7.5' },
@@ -265,11 +278,7 @@ class Component extends DCLogic {
         publishedPressed: on ? 'true' : 'false',
         trackBg: on ? '#c23b32' : '#a88676',
         knobLeft: on ? '19px' : '3px',
-        togglePublish: () => {
-          const n = Object.assign({}, (this.state && this.state.published) || {});
-          n[s.id] = !n[s.id];
-          this.setState({ published: n });
-        }
+        togglePublish: () => this.flip('published', s.id, '/cartas/' + s.id + '/mural', 'published')
       };
     });
 
@@ -294,7 +303,10 @@ class Component extends DCLogic {
     const TABS = ['Recebidas', 'Enviadas', 'Rascunhos'];
     const keptNow = !!kept[cur.id];
     return {
-      greeting: unopened === 0 ? 'Tudo lido. Mais uma chega amanhã.' : (unopened === 1 ? 'Uma carta fechada te esperando.' : unopened + ' cartas fechadas te esperando.'),
+      greeting: st.failed ? 'Não deu pra abrir sua caixa agora. Tente de novo daqui a pouco.'
+        : !st.inbox ? 'Abrindo sua caixa…'
+        : st.inbox.length === 0 ? 'Sua caixa está vazia. Por enquanto.'
+        : unopened === 0 ? 'Tudo lido. Mais uma chega amanhã.' : (unopened === 1 ? 'Uma carta fechada te esperando.' : unopened + ' cartas fechadas te esperando.'),
       tabs: TABS.map((name, i) => ({
         name, selected: i === tab ? 'true' : 'false',
         bg: i === tab ? '#fffaf4' : 'transparent',
@@ -314,11 +326,7 @@ class Component extends DCLogic {
         signature: '— alguém de ' + cur.city
       },
       closeLetter: () => this.setState({ reading: null }),
-      toggleKeep: () => {
-        const k = Object.assign({}, (this.state && this.state.kept) || {});
-        k[cur.id] = !k[cur.id];
-        this.setState({ kept: k });
-      },
+      toggleKeep: () => this.flip('kept', cur.id, '/cartas/' + cur.id + '/guardar', 'kept'),
       keepPressed: keptNow ? 'true' : 'false',
       keepLabel: keptNow ? 'Guardada' : 'Guardar com carinho',
       keepBg: keptNow ? '#fbf3ea' : 'transparent',

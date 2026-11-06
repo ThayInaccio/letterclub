@@ -241,7 +241,25 @@ summary::-webkit-details-marker{display:none}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"memberMonthly":{"editor":"float","default":29.9,"min":0,"step":0.1,"section":"Preço (exemplo)"},"$preview":{"width":1440,"height":3300}}'>
 class Component extends DCLogic {
-  state = { billing: 0, plan: 1, joined: false };
+  state = { billing: 0, plan: 1, joined: false, sending: false, memberNo: '' };
+  // erro aparece no próprio campo, com o balão nativo do navegador
+  warn(el, msg) {
+    el.setCustomValidity(msg);
+    el.reportValidity();
+    el.addEventListener('input', () => el.setCustomValidity(''), { once: true });
+  }
+  join(isMember, billing) {
+    const email = document.getElementById('cl-email');
+    const city = document.getElementById('cl-cidade');
+    if (!email.value.trim() || !email.checkValidity()) return this.warn(email, 'Escreve um e-mail pra gente mandar a Caixa.');
+    if ((this.state && this.state.sending)) return;
+    this.setState({ sending: true });
+    this.api('POST', '/clube', { email: email.value, city: city.value, plan: isMember ? 'membro' : 'leitor', billing: billing === 1 ? 'anual' : 'mensal' })
+      .then((r) => this.setState({ joined: true, sending: false, memberNo: r.memberNo }), (e) => {
+        this.setState({ sending: false });
+        this.warn(email, e.status === 400 ? 'Esse e-mail não parece certo.' : 'Não deu pra entrar agora. Tente de novo daqui a pouco.');
+      });
+  }
   money(v) { return 'R$ ' + v.toFixed(2).replace('.', ','); }
   renderVals() {
     const st = this.state || {};
@@ -305,14 +323,14 @@ class Component extends DCLogic {
       }),
       isMember,
       formTitle: isMember ? 'Quase lá. Só faltam dois detalhes.' : 'Entre de graça. Leva dez segundos.',
-      joinLabel: isMember ? (billing === 0 ? 'Entrar no clube · ' + this.money(monthly) + '/mês' : 'Entrar no clube · ' + this.money(yearlyTotal) + '/ano') : 'Entrar como leitor',
+      joinLabel: st.sending ? 'Entrando…' : isMember ? (billing === 0 ? 'Entrar no clube · ' + this.money(monthly) + '/mês' : 'Entrar no clube · ' + this.money(yearlyTotal) + '/ano') : 'Entrar como leitor',
       joinNote: isMember ? 'Pagamento na próxima etapa. Cancele quando quiser.' : 'Sem cartão. A primeira Caixa chega no começo do mês.',
-      join: () => this.setState({ joined: true }),
+      join: () => this.join(isMember, billing),
       reset: () => this.setState({ joined: false }),
       notJoined: !st.joined,
       joined: !!st.joined,
       cardKind: isMember ? 'CARTEIRINHA DE MEMBRO' : 'CARTEIRINHA DE LEITOR',
-      memberNo: '0428',
+      memberNo: st.memberNo || '',
       welcome: isMember ? 'Sua primeira Caixa chega na próxima quinzena, e a primeira carta em casa sai no dia 5 ou no dia 20 — o que vier primeiro.' : 'A primeira Caixa chega no começo do mês. Quando quiser receber cartas em casa, é só virar membro.'
     };
   }
