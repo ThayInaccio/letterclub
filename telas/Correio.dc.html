@@ -275,7 +275,46 @@ Escolher fotos
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"basePrice":{"editor":"float","default":24.9,"min":0,"step":0.1,"section":"Preços (exemplo)"},"calligrapherPrice":{"editor":"float","default":19.9,"min":0,"step":0.1,"section":"Preços (exemplo)"},"photoPrice":{"editor":"float","default":4.9,"min":0,"step":0.1,"section":"Preços (exemplo)"},"trackedPrice":{"editor":"float","default":12.9,"min":0,"step":0.1,"section":"Preços (exemplo)"},"$preview":{"width":1440,"height":1500}}'>
 class Component extends DCLogic {
-  state = { step: 0, method: 0, paper: 0, envelope: 0, extras: {}, photos: 0, dest: 0, shipping: 0, pay: 0 };
+  state = { step: 0, method: 0, paper: 0, envelope: 0, extras: {}, photos: 0, dest: 0, shipping: 0, pay: 0, address: null, paying: false };
+  warn(el, msg) {
+    el.setCustomValidity(msg);
+    el.reportValidity();
+    el.addEventListener('input', () => el.setCustomValidity(''), { once: true });
+  }
+  // Os campos de endereço só existem na etapa 2; lemos ao sair dela e devolvemos se a pessoa voltar.
+  readAddress() {
+    const f = {};
+    ['nome', 'cep', 'rua', 'num', 'comp', 'cidade', 'uf'].forEach((k) => { f[k] = document.getElementById('c-' + k); });
+    const rules = [
+      ['nome', (v) => !!v, 'Quem recebe a carta?'], ['cep', (v) => /^\d{5}-?\d{3}$/.test(v), 'O CEP tem 8 números.'],
+      ['rua', (v) => !!v, 'Falta a rua.'], ['num', (v) => !!v, 'Falta o número.'],
+      ['cidade', (v) => !!v, 'Falta a cidade.'], ['uf', (v) => /^[A-Za-z]{2}$/.test(v), 'A UF tem 2 letras, tipo SP.']
+    ];
+    for (const [k, ok, msg] of rules) if (!ok(f[k].value.trim())) { this.warn(f[k], msg); return null; }
+    const a = {};
+    for (const k in f) a[k] = f[k].value.trim();
+    return a;
+  }
+  componentDidUpdate(prevProps, prev) {
+    const st = this.state || {};
+    if (st.step === 1 && prev.step !== 1 && st.address) {
+      for (const k in st.address) { const el = document.getElementById('c-' + k); if (el) el.value = st.address[k]; }
+    }
+  }
+  pay(choices) {
+    const st = this.state || {};
+    if (st.paying) return;
+    if (choices.dest === 1 && !st.address) { this.setState({ step: 1 }); return; }
+    const email = document.getElementById('c-email');
+    if (!email.value.trim() || !email.checkValidity()) return this.warn(email, 'Precisamos do e-mail pra avisar quando a carta for postada.');
+    this.setState({ paying: true });
+    // dados de cartão nunca saem do navegador: o gateway (ainda a definir) tokeniza do lado do cliente
+    this.api('POST', '/pedidos', Object.assign({}, choices, { email: email.value, address: choices.dest === 1 ? st.address : undefined }))
+      .then(() => this.setState({ step: 3, paying: false }), (e) => {
+        this.setState({ paying: false });
+        this.warn(email, e.status === 400 ? 'Confira os dados: ' + e.message + '.' : 'Não deu pra fechar o pedido agora. Tente de novo.');
+      });
+  }
   money(v) { return 'R$ ' + v.toFixed(2).replace('.', ','); }
   num(name, def) { const v = Number(this.props[name] ?? def); return isNaN(v) ? def : v; }
   sel(on) {
@@ -354,8 +393,22 @@ class Component extends DCLogic {
       isStep0: step === 0, isStep1: step === 1, isStep2: step === 2, isDone: step === 3,
       showNav: step < 3, canBack: step > 0 && step < 3,
       back: () => this.setState({ step: Math.max(0, step - 1) }),
-      next: () => this.setState({ step: Math.min(3, step + 1) }),
-      nextLabel: step === 2 ? 'Pagar ' + this.money(total) : 'Continuar',
+      next: () => {
+        if (step === 1 && (st.dest || 0) === 1) {
+          const address = this.readAddress();
+          if (address) this.setState({ step: 2, address });
+          return;
+        }
+        if (step === 2) {
+          return this.pay({
+            method: st.method || 0, paper: st.paper || 0, envelope: st.envelope || 0,
+            extras: EXTRAS.filter((x) => extras[x.id]).map((x) => x.id), photos, dest: st.dest || 0,
+            shipping: st.shipping || 0, pay: (st.pay || 0) === 0 ? 'pix' : 'cartao'
+          });
+        }
+        this.setState({ step: Math.min(3, step + 1) });
+      },
+      nextLabel: st.paying ? 'Fechando o pedido…' : step === 2 ? 'Pagar ' + this.money(total) : 'Continuar',
       methods: METHODS.map((o, i) => Object.assign(this.sel(i === (st.method || 0)), {
         name: o.name, desc: o.desc, priceLabel: o.price ? '+ ' + this.money(o.price) : 'incluso',
         sample: o.sample, sampleFont: o.font, sampleSize: o.size, pick: pick('method', i)

@@ -1,0 +1,37 @@
+# Ambiente local completo: docker compose up --build  →  http://localhost:8080
+# Senha do banco aqui é só de desenvolvimento; em produção DATABASE_URL vem do Secrets Manager / External Secrets.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: letterclub
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-letterclub}
+      POSTGRES_DB: letterclub
+    volumes:
+      - db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U letterclub"]
+      interval: 2s
+      retries: 30
+
+  api:
+    build: { context: ., target: api }
+    environment:
+      DATABASE_URL: postgres://letterclub:${POSTGRES_PASSWORD:-letterclub}@db:5432/letterclub
+      COOKIE_SECURE: "false"   # http local; em produção fica o padrão (Secure)
+      DELIVERY_DELAY_SECONDS: ${DELIVERY_DELAY_SECONDS:-172800}
+    depends_on:
+      db: { condition: service_healthy }
+
+  web:
+    build:
+      context: .
+      target: web
+      args: { SITE_URL: "${SITE_URL:-http://localhost:8080}" }
+    ports:
+      - "8080:8080"
+    depends_on:
+      api: { condition: service_healthy }
+
+volumes:
+  db: {}
