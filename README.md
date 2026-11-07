@@ -91,17 +91,17 @@ docker build --build-arg SITE_URL=https://seu-dominio -t letterclub-web:<versão
 
 ## Deploy no Railway
 
-Três serviços no mesmo projeto, todos a partir deste repositório:
+Projeto `talented-emotion`, ambiente `production`, três serviços. `web` e `api` saem deste repositório (branch `main`, deploy automático a cada push):
 
-| Serviço | Config | Público? | Variáveis |
+| Serviço | Público? | Variáveis | Health check |
 |---|---|---|---|
-| **Postgres** | banco gerenciado do Railway | não | — |
-| **api** | `railway.api.json` (usa `Dockerfile.api`) | não, só rede privada | `DATABASE_URL=${{Postgres.DATABASE_URL}}`, `PORT=3000` |
-| **web** | `railway.web.json` (usa `Dockerfile`) | sim, domínio na porta 8080 | `SITE_URL=https://${{RAILWAY_PUBLIC_DOMAIN}}`, `API_UPSTREAM=http://api.railway.internal:3000` |
+| **Postgres** | não | (do Railway) | — |
+| **api** | não, só rede privada | `DATABASE_URL=${{Postgres.DATABASE_URL}}`, `PORT=3000`, `RAILWAY_DOCKERFILE_PATH=Dockerfile.api` | `/api/health` |
+| **web** | sim, porta 8080 | `SITE_URL=https://${{RAILWAY_PUBLIC_DOMAIN}}`, `API_UPSTREAM=http://${{api.RAILWAY_PRIVATE_DOMAIN}}:3000`, `PORT=8080`, `RAILWAY_DOCKERFILE_PATH=Dockerfile` | `/healthz` |
 
-- Em cada serviço, **Settings → Config-as-code** aponta para o arquivo da tabela.
+- A configuração fica na interface do Railway (o config-as-code em arquivo foi descontinuado por eles).
 - `Dockerfile.api` existe porque o Railway não escolhe um `--target`; mantenha igual ao estágio `api` do `Dockerfile`.
-- `SITE_URL` entra no build da web como build arg (canonical, `og:url`, sitemap). Ao trocar para um domínio próprio, atualize e refaça o deploy.
+- `SITE_URL` entra no build da web como build arg (canonical, `og:url`, sitemap). Com domínio próprio, troque para `https://seu-dominio` e refaça o deploy.
 - O nginx pega o IP do cliente do **último** endereço do `X-Forwarded-For` (o que a borda do Railway acrescenta), então o limite por IP vale por pessoa.
 
 ## Telas novas
