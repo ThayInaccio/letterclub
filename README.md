@@ -89,6 +89,21 @@ docker build --build-arg SITE_URL=https://seu-dominio -t letterclub-web:<versão
 - **api**: Node na porta 3000, usuário sem root, health check em `/api/health`, encerra limpo no SIGTERM.
 - Atrás de load balancer, configure `real_ip` no `nginx.conf` para o limite por IP valer por pessoa, não por LB.
 
+## Deploy no Railway
+
+Três serviços no mesmo projeto, todos a partir deste repositório:
+
+| Serviço | Config | Público? | Variáveis |
+|---|---|---|---|
+| **Postgres** | banco gerenciado do Railway | não | — |
+| **api** | `railway.api.json` (usa `Dockerfile.api`) | não, só rede privada | `DATABASE_URL=${{Postgres.DATABASE_URL}}`, `PORT=3000` |
+| **web** | `railway.web.json` (usa `Dockerfile`) | sim, domínio na porta 8080 | `SITE_URL=https://${{RAILWAY_PUBLIC_DOMAIN}}`, `API_UPSTREAM=http://api.railway.internal:3000` |
+
+- Em cada serviço, **Settings → Config-as-code** aponta para o arquivo da tabela.
+- `Dockerfile.api` existe porque o Railway não escolhe um `--target`; mantenha igual ao estágio `api` do `Dockerfile`.
+- `SITE_URL` entra no build da web como build arg (canonical, `og:url`, sitemap). Ao trocar para um domínio próprio, atualize e refaça o deploy.
+- O nginx pega o IP do cliente do **último** endereço do `X-Forwarded-For` (o que a borda do Railway acrescenta), então o limite por IP vale por pessoa.
+
 ## Telas novas
 
 1. Crie `telas/NomeDaTela.dc.html` no mesmo formato.
