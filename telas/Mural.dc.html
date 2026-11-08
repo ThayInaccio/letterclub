@@ -27,7 +27,7 @@ a{color:#c23b32}a:hover{color:#3a2620}
 <div style="min-height: 100vh; background: #fbf3ea; color: #3a2620; font-family: 'Work Sans', 'Helvetica Neue', Arial, sans-serif;">
 
 <header style="max-width: 1360px; margin: 0 auto; box-sizing: border-box; padding: 28px 5%; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;">
-<a href="Main.dc.html" style="font-family: 'Instrument Serif', Georgia, serif; font-size: 34px; line-height: 1; text-decoration: none; color: #c23b32;">letterclub</a>
+<a href="Main.dc.html" style="font-family: 'Homemade Apple', 'Segoe Script', cursive; font-size: 25px; line-height: 1.5; text-decoration: none; color: #c23b32;">letterclub</a>
 <nav aria-label="Principal" style="display: flex; flex-wrap: wrap; align-items: center; gap: 28px; font-size: 14px; line-height: 20px; font-weight: 500;">
 <a href="Main.dc.html" style="text-decoration: none; padding: 12px 0; color: #3a2620;">início</a>
 <a href="Cartas.dc.html" style="text-decoration: none; padding: 12px 0; color: #3a2620;">cartas</a>
@@ -100,7 +100,7 @@ Compartilhar
 
 <div style="flex: 0 0 auto; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 12px;">
 <div aria-label="Prévia da imagem para o Instagram" role="img" style="box-sizing: border-box; width: {{frame.w}}; height: {{frame.h}}; border-radius: 16px; background: {{shareBg.bg}}; color: {{shareBg.fg}}; padding: 28px 22px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 16px; box-shadow: 0 10px 28px rgba(58,38,32,0.18); transition: width 300ms ease-out, height 300ms ease-out, background-color 300ms ease-out;">
-<p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 26px; line-height: 1; letter-spacing: -0.01em;">letterclub</p>
+<p style="margin: 0; font-family: 'Homemade Apple', 'Segoe Script', cursive; font-size: 19px; line-height: 1.5;">letterclub</p>
 <div style="box-sizing: border-box; width: 100%; padding: 18px 18px 10px; border-radius: 8px; background: {{sl.bg}}; color: {{sl.fg}}; box-shadow: 0 6px 18px rgba(31,23,21,0.22); transform: rotate(-2deg); display: flex; flex-direction: column; gap: 8px;">
 <p style="margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 9px; line-height: 12px; letter-spacing: 0.14em; font-weight: 500; color: {{sl.muted}};">{{sl.postmark}}</p>
 <p style="margin: 0; font-family: {{sl.family}}; font-size: {{sl.smallSize}}; line-height: 27px; background-image: repeating-linear-gradient(to bottom, transparent 0px, transparent 26px, {{sl.rule}} 26px, {{sl.rule}} 27px);">{{sl.text}}</p>
@@ -228,14 +228,13 @@ class Component extends DCLogic {
     const H = fmt === 0 ? 1920 : 1350;
     const fam = l.pen.family.split(',')[0].trim();
     const host = (window.location.host || 'letterclub.io').replace(/^www\./, '').toUpperCase();
-    const SERIF = "'Instrument Serif', Georgia, serif";
     const MONO = "500 26px 'IBM Plex Mono', monospace";
     let scale = 2.3;
     const fontPx = () => Math.round(parseFloat(l.pen.size) * scale);
     const lineH = () => Math.round(36 * scale);
     await Promise.all([
       document.fonts.load(fontPx() + 'px ' + fam, l.text),
-      document.fonts.load('88px ' + SERIF, 'letterclub'),
+      document.fonts.load("64px 'Homemade Apple'", 'letterclub'),
       document.fonts.load(MONO, host),
       document.fonts.load("44px 'Homemade Apple'", l.city)
     ]).catch(() => {});
@@ -263,7 +262,7 @@ class Component extends DCLogic {
     // fundo, marca e rodapé
     ctx.fillStyle = bg.bg; ctx.fillRect(0, 0, W, H);
     ctx.fillStyle = bg.fg; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-    ctx.font = '88px ' + SERIF;
+    ctx.font = "64px 'Homemade Apple', cursive";
     ctx.fillText('letterclub', W / 2, fmt === 0 ? 210 : 140);
     ctx.font = MONO;
     if ('letterSpacing' in ctx) ctx.letterSpacing = '5px';

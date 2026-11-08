@@ -66,7 +66,7 @@ a{color:#ffffff}a:hover{color:#fbf3ea}
 <svg aria-hidden="true" width="100%" height="100%" style="position: absolute; inset: -10%; width: 120%; height: 120%; opacity: 0.16; mix-blend-mode: overlay; pointer-events: none; animation: lc-grain 1.2s steps(4) infinite;"><filter id="lc-noise"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"></feTurbulence><feColorMatrix type="saturate" values="0"></feColorMatrix></filter><rect width="100%" height="100%" filter="url(#lc-noise)"></rect></svg>
 
 <header style="position: relative; z-index: 2; width: 100%; max-width: 1440px; margin: 0 auto; box-sizing: border-box; padding: 28px 5%; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;">
-<a href="Main.dc.html" style="font-family: 'Instrument Serif', Georgia, serif; font-size: 34px; line-height: 1; letter-spacing: -0.01em; text-decoration: none;">letterclub</a>
+<a href="Main.dc.html" style="font-family: 'Homemade Apple', 'Segoe Script', cursive; font-size: 25px; line-height: 1.5; text-decoration: none;">letterclub</a>
 <nav aria-label="Principal" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; font-size: 14px; line-height: 20px; font-weight: 500;">
 <a href="Cartas.dc.html" style="text-decoration: none; padding: 12px 0;">cartas</a>
 <a href="Mural.dc.html" style="text-decoration: none; padding: 12px 0;">mural</a>
@@ -78,14 +78,20 @@ a{color:#ffffff}a:hover{color:#fbf3ea}
 
 <div style="position: relative; z-index: 2; flex: 1 1 auto; width: 100%; max-width: 1280px; margin: 0 auto; box-sizing: border-box; padding: 0 5% 32px; display: flex; flex-direction: column; align-items: center;">
 
-<div style="position: relative; width: 100%; padding-top: 24px; display: flex; flex-direction: column; align-items: center; gap: clamp(40px, 5vw, 64px);">
-<h1 style="margin: 0; display: flex; flex-direction: column; align-items: center; text-align: center; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400;">
-<span style="display: block; font-size: clamp(88px, 13vw, 200px); line-height: 0.85; letter-spacing: -0.045em; animation: lc-rise 1100ms cubic-bezier(.22,.61,.36,1) {{d1}} both;">escreva</span>
-<span style="display: block; font-style: italic; color: #f6d9cf; font-size: clamp(56px, 7.5vw, 120px); line-height: 1; letter-spacing: -0.03em; animation: lc-rise 1100ms cubic-bezier(.22,.61,.36,1) {{d2}} both;">para alguém</span>
-<span style="display: block; margin-top: 20px; font-size: clamp(28px, 3vw, 44px); line-height: 1.1; letter-spacing: -0.01em; animation: lc-rise 1100ms cubic-bezier(.22,.61,.36,1) {{d3}} both;">que você nunca vai conhecer.</span>
+<div style="position: relative; width: 100%; padding-top: 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: clamp(40px, 5vw, 72px);">
+<div style="flex: 1 1 420px; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 36px;">
+<h1 style="margin: 0; display: flex; flex-direction: column; align-items: flex-start; text-align: left; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400;">
+<span style="display: block; font-size: clamp(76px, 10vw, 168px); line-height: 0.85; letter-spacing: -0.045em; animation: lc-rise 1100ms cubic-bezier(.22,.61,.36,1) {{d1}} both;">escreva</span>
+<span style="display: block; font-style: italic; color: #f6d9cf; font-size: clamp(52px, 6.4vw, 108px); line-height: 1; letter-spacing: -0.03em; animation: lc-rise 1100ms cubic-bezier(.22,.61,.36,1) {{d2}} both;">para alguém</span>
+<span style="display: block; margin-top: 20px; font-size: clamp(26px, 2.6vw, 40px); line-height: 1.1; letter-spacing: -0.01em; animation: lc-rise 1100ms cubic-bezier(.22,.61,.36,1) {{d3}} both;">que você nunca vai conhecer.</span>
 </h1>
+<div style="display: flex; flex-wrap: wrap; justify-content: flex-start; gap: 12px; animation: lc-rise 1000ms cubic-bezier(.22,.61,.36,1) {{d3}} both;">
+<a href="Escrever.dc.html" class="lc-pill" style="display: inline-flex; align-items: center; min-height: 52px; padding: 0 28px; border-radius: 999px; background: #fbf3ea; color: #c23b32; font-size: 14px; line-height: 20px; font-weight: 500; text-decoration: none;">Escrever uma carta</a>
+<a href="#cartas" class="lc-pill" style="display: inline-flex; align-items: center; min-height: 52px; padding: 0 28px; border-radius: 999px; border: 1.5px solid rgba(255,255,255,0.85); font-size: 14px; line-height: 20px; font-weight: 500; text-decoration: none;">Ler cartas</a>
+</div>
+</div>
 
-<div aria-hidden="true" style="position: relative; width: min(500px, 80vw); aspect-ratio: 540 / 600; animation: lc-rise 1200ms cubic-bezier(.22,.61,.36,1) {{d2}} both;">
+<div aria-hidden="true" style="position: relative; flex: 0 1 500px; width: min(500px, 100%); aspect-ratio: 540 / 600; animation: lc-rise 1200ms cubic-bezier(.22,.61,.36,1) {{d2}} both;">
 <div style="position: absolute; left: 10%; top: 2%; width: 62%; z-index: 1; animation: lc-float 7s ease-in-out infinite alternate;">
 <div style="box-sizing: border-box; aspect-ratio: 3 / 3.8; overflow: hidden; padding: 28px 26px; border-radius: 10px; background: #fffaf4; color: #3a2620; box-shadow: 0 2px 4px rgba(58,38,32,0.10), 0 18px 40px rgba(58,38,32,0.22); transform: rotate(-7deg); display: flex; flex-direction: column; gap: 12px;">
 <p style="margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500; color: #7a5a4e;">RECIFE · 6H</p>
@@ -103,10 +109,6 @@ a{color:#ffffff}a:hover{color:#fbf3ea}
 <p style="position: absolute; left: 7%; bottom: 9%; margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500; color: #3a2620;">PARA: ALGUÉM · QUALQUER LUGAR</p>
 </div>
 </div>
-<div style="position: absolute; right: -2%; top: 24%; z-index: 3; transform: rotate(9deg); display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 999px; background: #3f6b57; color: #fbf3ea; box-shadow: 0 10px 24px rgba(58,38,32,0.25);">
-<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
-<span style="font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500;">ENTREGUE · 2 DIAS</span>
-</div>
 <div style="position: absolute; left: -4%; bottom: 2%; z-index: 3; width: 28%; aspect-ratio: 1 / 1;">
 <svg viewBox="0 0 160 160" style="position: absolute; inset: 0; width: 100%; height: 100%; animation: lc-spin 22s linear infinite;"><defs><path id="lc-badge-path" d="M80,80 m-60,0 a60,60 0 1,1 120,0 a60,60 0 1,1 -120,0"></path></defs><circle cx="80" cy="80" r="80" fill="#d9a441"></circle><text font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="500" letter-spacing="3" fill="#3a2620"><textPath href="#lc-badge-path">ESCRITO À MÃO · ENTREGUE DEVAGAR · </textPath></text></svg>
 <span style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: clamp(18px, 2.2vw, 30px); line-height: 1; color: #3a2620;">à mão</span>
@@ -117,12 +119,7 @@ a{color:#ffffff}a:hover{color:#fbf3ea}
 </div>
 
 
-<div style="margin-top: 32px; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; animation: lc-rise 1000ms cubic-bezier(.22,.61,.36,1) {{d3}} both;">
-<a href="Escrever.dc.html" class="lc-pill" style="display: inline-flex; align-items: center; min-height: 52px; padding: 0 28px; border-radius: 999px; background: #fbf3ea; color: #c23b32; font-size: 14px; line-height: 20px; font-weight: 500; text-decoration: none;">Escrever uma carta</a>
-<a href="#cartas" class="lc-pill" style="display: inline-flex; align-items: center; min-height: 52px; padding: 0 28px; border-radius: 999px; border: 1.5px solid rgba(255,255,255,0.85); font-size: 14px; line-height: 20px; font-weight: 500; text-decoration: none;">Ler cartas</a>
-</div>
-
-<div style="margin-top: 56px; width: 100%; box-sizing: border-box; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.35); display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.22em; font-weight: 500;">
+<div style="margin-top: 72px; width: 100%; box-sizing: border-box; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.35); display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.22em; font-weight: 500;">
 <div aria-hidden="true" style="height: 28px; display: flex; align-items: center; gap: 3px;">
 <sc-for list="{{bars}}" as="b" hint-placeholder-count="28">
 <span style="display: block; width: 2px; height: {{b.h}}; border-radius: 999px; background: #f2b8a2; opacity: {{b.o}}; transform-origin: center; animation: lc-wave {{b.dur}} ease-in-out {{b.delay}} infinite alternate;"></span>
@@ -191,7 +188,7 @@ a{color:#ffffff}a:hover{color:#fbf3ea}
 </section>
 
 <footer style="max-width: 1440px; margin: 0 auto; box-sizing: border-box; padding: 24px 5% 40px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; border-top: 1px solid rgba(255,255,255,0.35);">
-<p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 24px; line-height: 1;">letterclub</p>
+<p style="margin: 0; font-family: 'Homemade Apple', 'Segoe Script', cursive; font-size: 18px; line-height: 1.5;">letterclub</p>
 <p style="margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500;">CARTAS ANÔNIMAS, ESCRITAS COM CALMA</p>
 <button type="button" onClick="{{replay}}" style="min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1.5px solid rgba(255,255,255,0.85); background: transparent; color: #ffffff; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer;">Rever a abertura</button>
 </footer>
