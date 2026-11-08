@@ -50,6 +50,30 @@ CREATE TABLE IF NOT EXISTS members (
   updated_at  timestamptz NOT NULL DEFAULT now()
 );
 
+-- Clube grátis (a Caixa semanal): confirmação dupla e descadastro em um clique.
+-- status: pendente (falta confirmar) | ativo | saiu
+ALTER TABLE members ADD COLUMN IF NOT EXISTS confirm_token_hash text;
+ALTER TABLE members ADD COLUMN IF NOT EXISTS confirm_sent_at    timestamptz;
+ALTER TABLE members ADD COLUMN IF NOT EXISTS confirmed_at       timestamptz;
+ALTER TABLE members ADD COLUMN IF NOT EXISTS unsub_token        text;
+ALTER TABLE members ADD COLUMN IF NOT EXISTS unsubscribed_at    timestamptz;
+CREATE UNIQUE INDEX IF NOT EXISTS members_confirm ON members (confirm_token_hash) WHERE confirm_token_hash IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS members_unsub   ON members (unsub_token) WHERE unsub_token IS NOT NULL;
+-- planos pagos ficaram para depois: quem estava esperando pagamento vira inscrito pendente
+UPDATE members SET status = 'pendente' WHERE status = 'aguardando_pagamento';
+
+-- "mais curtidas da semana" precisa saber quando cada favorito aconteceu
+ALTER TABLE favorites ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now();
+CREATE INDEX IF NOT EXISTS favorites_recent ON favorites (created_at);
+
+-- Uma Caixa por pessoa por semana, mesmo se o job rodar duas vezes.
+CREATE TABLE IF NOT EXISTS digest_sends (
+  member_id  integer NOT NULL REFERENCES members(id) ON DELETE CASCADE,
+  week       date NOT NULL,
+  sent_at    timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (member_id, week)
+);
+
 CREATE TABLE IF NOT EXISTS orders (
   id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   session_id      uuid REFERENCES sessions(id) ON DELETE SET NULL,

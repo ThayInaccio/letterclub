@@ -87,29 +87,61 @@ assert.equal((await B('POST', `/api/mural/${sent.body.id}/favorito`, { fav: fals
 assert.equal((await A('POST', `/api/cartas/${sent.body.id}/mural`, { published: false })).status, 200);
 assert.equal((await B('POST', `/api/mural/${sent.body.id}/favorito`, { fav: true })).status, 404, 'fora do mural não favorita');
 
-// clube
-assert.equal((await anon('POST', '/api/clube', { email: 'nao-email', plan: 'leitor', billing: 'mensal' })).status, 400);
+// clube grátis: inscrição pendente até confirmar pelo e-mail
+assert.equal((await anon('POST', '/api/clube', { email: 'nao-email' })).status, 400);
 const mail = `teste+${Date.now()}@exemplo.com`;
-const j1 = await anon('POST', '/api/clube', { email: mail, city: 'Recife', plan: 'leitor', billing: 'mensal' });
+const j1 = await anon('POST', '/api/clube', { email: mail, city: 'Recife' });
 assert.equal(j1.status, 200);
 assert.match(j1.body.memberNo, /^\d{4,}$/);
-assert.equal(j1.body.status, 'ativo');
-const j2 = await anon('POST', '/api/clube', { email: mail.toUpperCase(), plan: 'membro', billing: 'anual' });
-assert.equal(j2.body.memberNo, j1.body.memberNo, 'mesmo e-mail, mesma carteirinha');
-assert.equal(j2.body.status, 'aguardando_pagamento');
+assert.equal(j1.body.status, 'pendente', 'só vira membro depois de confirmar');
+assert.equal((await anon('POST', '/api/clube', { email: mail.toUpperCase() })).status, 429, 'não reenvia confirmação na hora (anti-flood)');
+const redirect = async (method, path, body) => {
+  const res = await fetch(BASE + path, { method, redirect: 'manual', ...(body && { headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body }) });
+  return { status: res.status, location: res.headers.get('location') };
+};
+assert.match((await redirect('GET', '/api/clube/confirmar?t=' + 'x'.repeat(32))).location, /link=invalido/, 'token falso não confirma');
+assert.match((await redirect('GET', '/api/clube/sair?t=' + 'x'.repeat(32))).location, /saiu=1/, 'sair não revela se o token existe');
 
-// correio: total sempre do servidor
-const order = { method: 1, paper: 1, envelope: 2, extras: ['cera', 'cera'], photos: 2, dest: 0, shipping: 1, pay: 'pix', email: mail, total: 1 };
-const o1 = await A('POST', '/api/pedidos', order);
-assert.equal(o1.status, 201);
-assert.equal(o1.body.total, 2490 + 1990 + 600 + 590 + 2 * 490 + 1290, 'ignora total do cliente e extra repetido');
-assert.equal(o1.body.status, 'aguardando_pagamento');
-assert.equal((await A('POST', '/api/pedidos', { ...order, dest: 1 })).status, 400, 'endereço obrigatório');
-const addr = { nome: 'Ana', cep: '01310-100', rua: 'Av. Paulista', num: '1000', cidade: 'São Paulo', uf: 'sp' };
-assert.equal((await A('POST', '/api/pedidos', { ...order, dest: 1, address: { ...addr, cep: '123' } })).status, 400, 'CEP');
-assert.equal((await A('POST', '/api/pedidos', { ...order, dest: 1, address: addr })).status, 201);
-assert.equal((await A('POST', '/api/pedidos', { ...order, extras: ['ouro'] })).status, 400);
-assert.equal((await A('POST', '/api/pedidos', { ...order, photos: 4 })).status, 400);
+// Com o SMTP de teste (tests/smtp-sink.mjs + MAIL_DIR), segue o fluxo inteiro pelos e-mails.
+// Com DATABASE_URL também, roda a Caixa semanal de verdade.
+if (process.env.MAIL_DIR) {
+  const { readdirSync, readFileSync } = await import('node:fs');
+  const { join } = await import('node:path');
+  const inbox = (to) => readdirSync(process.env.MAIL_DIR).sort()
+    .map((f) => readFileSync(join(process.env.MAIL_DIR, f), 'utf8').replace(/=\r?\n/g, '').replace(/=3D/g, '='))
+    .filter((m) => m.startsWith(`X-Sink-To: ${to}`));
+  const waitMail = async (to, re) => {
+    for (let i = 0; i < 40; i++) { const m = inbox(to).filter((x) => re.test(x)); if (m.length) return m; await new Promise((r) => setTimeout(r, 150)); }
+    return [];
+  };
+  const [conf] = await waitMail(mail, /confirmar\?t=/);
+  assert.ok(conf, 'e-mail de confirmação chegou');
+  const t = /\/api\/clube\/confirmar\?t=([\w-]+)/.exec(conf)[1];
+  const c1 = await redirect('GET', '/api/clube/confirmar?t=' + t);
+  assert.equal(c1.status, 303);
+  assert.match(c1.location, /^\/clube\/\?confirmado=1&n=\d{4,}/);
+  assert.match((await redirect('GET', '/api/clube/confirmar?t=' + t)).location, /link=invalido/, 'link de confirmação vale uma vez');
+  assert.equal((await anon('POST', '/api/clube', { email: mail })).body.status, 'ativo', 'confirmado vira membro');
+
+  if (process.env.DATABASE_URL) {
+    const { execFileSync } = await import('node:child_process');
+    const run = () => execFileSync('node', ['server/semanal.js'], { env: process.env, encoding: 'utf8' });
+    run();
+    const weekly = await waitMail(mail, /A Caixa da semana/);
+    assert.equal(weekly.length, 1, 'Caixa semanal chegou');
+    assert.match(weekly[0], /List-Unsubscribe-Post: List-Unsubscribe=One-Click/);
+    assert.match(weekly[0], /\/mural\/#carta-/, 'Caixa linka as cartas no mural');
+    run();
+    await new Promise((r) => setTimeout(r, 500));
+    assert.equal(inbox(mail).filter((m) => /A Caixa da semana/.test(m)).length, 1, 'rodar de novo não manda duas vezes');
+    const u = /\/api\/clube\/sair\?t=([\w-]+)/.exec(weekly[0])[1];
+    assert.equal((await redirect('POST', '/api/clube/sair?t=' + u, 'List-Unsubscribe=One-Click')).status, 200, 'one-click do Gmail');
+    assert.match((await redirect('GET', '/api/clube/sair?t=' + u)).location, /saiu=1/);
+  }
+}
+
+// correio físico desligado até existir gateway de pagamento (FEATURE_CORREIO)
+assert.equal((await A('POST', '/api/pedidos', { email: mail })).status, 404, 'pedidos do correio fora do ar');
 
 assert.equal((await anon('GET', '/api/nada')).status, 404);
 assert.equal((await anon('DELETE', '/api/caixa')).status, 405);

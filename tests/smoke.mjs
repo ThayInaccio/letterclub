@@ -40,6 +40,8 @@ await send('Runtime.enable'); await send('Page.enable'); await send('Log.enable'
 // clipboard e foco como num navegador real (headless começa sem os dois)
 await send('Browser.grantPermissions', { origin: BASE, permissions: ['clipboardReadWrite', 'clipboardSanitizedWrite'] });
 await send('Emulation.setFocusEmulationEnabled', { enabled: true });
+// pop-ups (WhatsApp) só são registrados: uma aba nova roubaria o foco e a área de transferência
+await send('Page.addScriptToEvaluateOnNewDocument', { source: `window.open = (u) => { (window.__opened = window.__opened || []).push(String(u)); return null; };` });
 const go = async (route) => {
   await send('Page.navigate', { url: 'about:blank' }); // garante load mesmo em navegação só de #hash
   await sleep(50);
@@ -148,37 +150,49 @@ const favCount = await ev(`document.querySelectorAll('[aria-label="Tirar dos fav
 await go('/mural/'); await sleep(500);
 check(favCount > 0 && await ev(`document.querySelectorAll('[aria-label="Tirar dos favoritos"]').length`) === favCount, 'mural: favorito não persiste');
 
-// clube: entrar gera carteirinha com número do servidor; e-mail vazio é barrado
+// clube: e-mail vazio é barrado; inscrição mostra a carteirinha "falta confirmar" com número do servidor
 await go('/clube/');
-const joinBtn = await ev(`[...document.querySelectorAll('#app button')].map(b=>b.textContent.trim()).find(t=>t.startsWith('Entrar no clube'))`);
-await ev(click(joinBtn, 0)); await sleep(300);
+await ev(click('Quero receber a Caixa', 0)); await sleep(300);
 check(await ev(`!!document.getElementById('cl-email') && !document.getElementById('cl-email').validity.valid`), 'clube: entrou sem e-mail');
 await ev(`(()=>{const e=document.getElementById('cl-email');e.value='smoke+${Date.now()}@exemplo.com';e.dispatchEvent(new Event('input',{bubbles:true}))})()`);
-await ev(click(joinBtn, 0)); await sleep(600);
-check(await ev(`!document.getElementById('cl-email') && /Nº \\d{4,}/.test(document.body.innerText)`), 'clube: carteirinha sem número do servidor');
+await ev(click('Quero receber a Caixa', 0)); await sleep(700);
+check(await ev(`!document.getElementById('cl-email') && /Nº \\d{4,}/.test(document.body.innerText) && document.body.innerText.includes('Quase lá.')`), 'clube: inscrição sem carteirinha pendente');
+// voltar dos links do e-mail
+await go('/clube/?saiu=1');
+check(await ev(`document.body.innerText.includes('Você saiu do clube')`), 'clube: aviso de saída não aparece');
+await go('/clube/?confirmado=1&n=0042');
+check(await ev(`document.body.innerText.includes('Agora você é do clube') && document.body.innerText.includes('Nº 0042')`), 'clube: confirmação não aparece');
 
-// correio: endereço validado, volta preenchido, pedido criado no servidor
-await go('/correio/');
-await ev(click('Continuar', 0)); await sleep(300);
-await ev(`[...document.querySelectorAll('#app button')].find(b=>b.textContent.includes('Pra alguém que você conhece')).click()`); await sleep(300);
-await ev(click('Continuar', 0)); await sleep(300);
-check(await ev(`!!document.getElementById('c-nome')`), 'correio: avançou sem endereço');
-await ev(`Object.entries({nome:'Ana',cep:'01310-100',rua:'Av. Paulista',num:'1000',cidade:'São Paulo',uf:'SP'}).forEach(([k,v])=>{document.getElementById('c-'+k).value=v})`);
-await ev(click('Continuar', 0)); await sleep(300);
-await ev(click('Voltar', 0)); await sleep(300);
-check(await ev(`document.getElementById('c-cep')?.value==='01310-100'`), 'correio: endereço some ao voltar');
-await ev(click('Continuar', 0)); await sleep(300);
-await ev(`document.getElementById('c-email').value='smoke@exemplo.com'`);
-const payLabel = await ev(`[...document.querySelectorAll('#app button')].map(b=>b.textContent.trim()).find(t=>t.startsWith('Pagar'))`);
-await ev(click(payLabel, 0)); await sleep(800);
-check(await ev(`!!document.querySelector('#app [role=status]') && !document.getElementById('c-email')`), 'correio: pedido não fechou');
+// preço e correio físico escondidos
+for (const route of routes) {
+  await go(route);
+  check(!(await ev(`/R\\$\\s?\\d|pelo correio|calígrafo|Correio/.test(document.body.innerText)`)), `${route}: ainda fala de preço ou correio físico`);
+}
+check((await fetch(BASE + '/correio/')).status === 404, '/correio/ ainda publicado');
 
 await go('/mural/'); await ev(click('Compartilhar', 0)); await sleep(300); await ev(click('Copiar link', 0)); await sleep(400);
 check(await ev(`document.body.innerText.includes('Link copiado.')`), 'mural: copiar link não confirma');
-const copied = await ev('navigator.clipboard.readText()');
-check(/\/mural\/#carta-[\w-]+$/.test(copied), `mural: link copiado inválido (${copied})`);
-await go(new URL(copied).pathname + new URL(copied).hash);
-check(await ev(`!!document.getElementById(${JSON.stringify(new URL(copied).hash.slice(1))})`), 'mural: âncora do link copiado não existe');
+const copied = await ev('navigator.clipboard.readText()').catch(() => '');
+check(/\/mural\/#carta-[\w-]+$/.test(copied), `mural: link copiado inválido (${copied || 'área de transferência vazia'})`);
+if (copied) { // sem o link, o resto do teste ainda roda
+  await go(new URL(copied).pathname + new URL(copied).hash);
+  check(await ev(`!!document.getElementById(${JSON.stringify(new URL(copied).hash.slice(1))})`), 'mural: âncora do link copiado não existe');
+}
+
+// compartilhar no WhatsApp (sem Web Share, como no computador): abre o wa.me com o link da carta
+await go('/mural/'); await ev(click('Compartilhar', 0)); await sleep(300); await ev(click('WhatsApp', 0)); await sleep(300);
+check(await ev(`(window.__opened||[]).some(u=>/^https:\\/\\/wa\\.me\\/\\?text=.*mural.*carta-/.test(decodeURIComponent(u)))`), 'mural: WhatsApp não abre com o link da carta');
+
+// compartilhar: a imagem é gerada de verdade e baixada como PNG
+const dl = fs.mkdtempSync(path.join(os.tmpdir(), 'lc-dl-'));
+await send('Browser.setDownloadBehavior', { behavior: 'allow', downloadPath: dl });
+await go('/mural/'); await ev(click('Compartilhar', 0)); await sleep(1200); await ev(click('Baixar imagem', 0));
+let png;
+for (let i = 0; i < 40 && !png; i++) { await sleep(150); png = fs.readdirSync(dl).find((f) => f.endsWith('.png')); }
+check(png && fs.statSync(path.join(dl, png)).size > 30000 && fs.readFileSync(path.join(dl, png)).subarray(1, 4).toString() === 'PNG', 'mural: imagem de compartilhar não foi gerada');
+if (png) fs.copyFileSync(path.join(dl, png), path.join(os.tmpdir(), 'lc-share-' + png)); // fica pra olhar
+fs.rmSync(dl, { recursive: true, force: true });
+
 
 // celular: sem rolagem horizontal
 await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true });

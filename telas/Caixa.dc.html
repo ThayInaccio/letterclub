@@ -260,8 +260,7 @@ class Component extends DCLogic {
     const SENT = (st.sentList || []).map((x, i) => Object.assign({}, x, { tilt: ['-3deg', '2deg', '-1deg'][i % 3], kind: x.status }));
     const STATUS = {
       way: { label: 'A caminho · chega em 2 dias', bg: '#f6d9cf', fg: '#3a2620', icon: 'M5 12h11M12 7l5 5-5 5' },
-      done: { label: 'Entregue', bg: '#3f6b57', fg: '#fbf3ea', icon: 'M5 12.5l4.5 4.5L19 7.5' },
-      mail: { label: 'Entregue pelo correio', bg: '#d9a441', fg: '#3a2620', icon: 'M3 6h18v12H3z M3 7l9 6 9-6' }
+      done: { label: 'Entregue', bg: '#3f6b57', fg: '#fbf3ea', icon: 'M5 12.5l4.5 4.5L19 7.5' }
     };
     const sent = SENT.map((s, i) => {
       const on = !!published[s.id];
