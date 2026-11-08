@@ -59,12 +59,20 @@ const routes = [
   ['GET', /^\/api\/mural$/, async (c) => cartas.mural(await c.maybeSession())],
   ['POST', /^\/api\/mural\/([^/]+)\/favorito$/, async (c) => cartas.favorite(await c.session(), c.params[0], await c.body())],
   ['POST', /^\/api\/clube$/, async (c) => clube.join(await c.body())],
-  ['POST', /^\/api\/pedidos$/, async (c) => pedidos.create(await c.session(), await c.body()), 201],
+  ['GET', /^\/api\/clube\/confirmar$/, async (c) => clube.confirm(c.query.get('t'))],
+  // descadastro: link do e-mail (GET) e one-click do List-Unsubscribe (POST sem JSON, RFC 8058)
+  ['GET', /^\/api\/clube\/sair$/, async (c) => clube.leave(c.query.get('t'))],
+  ['POST', /^\/api\/clube\/sair$/, async (c) => { await clube.leave(c.query.get('t')); return { ok: true }; }],
+  // Correio físico fica desligado até existir gateway de pagamento (FEATURE_CORREIO=true liga).
+  ...(process.env.FEATURE_CORREIO === 'true'
+    ? [['POST', /^\/api\/pedidos$/, async (c) => pedidos.create(await c.session(), await c.body()), 201]]
+    : []),
 ];
 
 const server = http.createServer(async (req, res) => {
   const t0 = Date.now();
-  const path = new URL(req.url, 'http://x').pathname;
+  const url = new URL(req.url, 'http://x');
+  const path = url.pathname;
   let status = 200; let out;
   try {
     const route = routes.find(([m, re]) => re.test(path) && m === req.method);
@@ -73,7 +81,7 @@ const server = http.createServer(async (req, res) => {
       out = { error: status === 405 ? 'método não permitido' : 'não encontrado' };
     } else {
       const ctx = {
-        req, res, params: route[1].exec(path).slice(1),
+        req, res, params: route[1].exec(path).slice(1), query: url.searchParams,
         body: (() => { let b; return () => (b ??= readJson(req)); })(), // POST lê o corpo antes de criar sessão
         session: async () => { if (req.method === 'POST') await ctx.body(); return ensureSession(req, res); },
         maybeSession: () => findSession(req),
@@ -85,6 +93,13 @@ const server = http.createServer(async (req, res) => {
     status = e.status || 500;
     out = { error: status === 500 ? 'erro interno' : e.message };
     if (status === 500) console.error(JSON.stringify({ level: 'error', path, msg: e.message, stack: e.stack }));
+  }
+  // handler devolve { redirect: '/caminho' } para links abertos direto do e-mail (só caminhos locais)
+  if (status === 200 && typeof out?.redirect === 'string' && out.redirect.startsWith('/') && !out.redirect.startsWith('//')) {
+    res.writeHead(303, { Location: out.redirect, 'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer' });
+    res.end();
+    console.log(JSON.stringify({ method: req.method, path, status: 303, ms: Date.now() - t0 }));
+    return;
   }
   res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
   res.end(JSON.stringify(out));

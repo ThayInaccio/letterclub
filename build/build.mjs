@@ -68,7 +68,9 @@ fs.rmSync(GEN, { recursive: true, force: true });
 fs.rmSync(DIST, { recursive: true, force: true });
 fs.mkdirSync(GEN, { recursive: true });
 
-const files = fs.readdirSync(SRC).filter((f) => f.endsWith('.dc.html'));
+const hidden = new Set(site.hidden || []);
+const files = fs.readdirSync(SRC).filter((f) => f.endsWith('.dc.html') && !hidden.has(f.replace('.dc.html', '')));
+for (const n of hidden) assert(!site.pages[n], `site.config.mjs: ${n} está em hidden e em pages ao mesmo tempo`);
 const dsErrors = files.flatMap((f) => lintDS('telas/' + f, fs.readFileSync(path.join(SRC, f), 'utf8')));
 if (dsErrors.length) {
   console.error(`✗ ${dsErrors.length} problema(s) de design system:\n  ` + dsErrors.join('\n  '));
@@ -176,6 +178,6 @@ fs.writeFileSync(path.join(DIST, 'sitemap.xml'),
   `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
   sitemap.map((u) => `  <url><loc>${esc(u)}</loc></url>`).join('\n') + `\n</urlset>\n`);
 fs.writeFileSync(path.join(DIST, 'robots.txt'),
-  // sem Disallow: o crawler precisa abrir /caixa/ e /correio/ para ver o noindex
+  // sem Disallow: o crawler precisa abrir /caixa/ para ver o noindex
   `User-agent: *\nAllow: /\nSitemap: ${SITE_URL}/sitemap.xml\n`);
 console.log(`✓ sitemap.xml (${sitemap.length} urls), robots.txt → dist/`);

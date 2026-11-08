@@ -9,4 +9,5 @@ COPY server ./server
 USER node
 EXPOSE 3000
 HEALTHCHECK CMD wget -qO- http://127.0.0.1:3000/api/health || exit 1
+# A mesma imagem roda a Caixa semanal: no Railway, um serviço cron com start command "node server/semanal.js".
 CMD ["node", "server/index.js"]

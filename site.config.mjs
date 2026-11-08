@@ -4,6 +4,9 @@ export default {
   name: 'letterclub',
   locale: 'pt_BR',
   themeColor: '#c23b32',
+  // Telas guardadas no repositório mas fora do site até a feature estar pronta (o build ignora).
+  // Correio: mandar a carta pelo correio físico depende de gateway de pagamento.
+  hidden: ['Correio'],
   pages: {
     Main: {
       route: '/',
@@ -28,13 +31,7 @@ export default {
     Clube: {
       route: '/clube/',
       title: 'O clube — letterclub',
-      description: 'Entre no letterclub: newsletter quinzenal, textos inéditos e duas cartas por mês na sua casa, pelo correio de verdade.',
-    },
-    Correio: {
-      route: '/correio/',
-      title: 'Mandar pelo correio — letterclub',
-      description: 'Mande sua carta pelo correio de verdade, com papelaria, calígrafo e fotos.',
-      index: false,
+      description: 'Entre no clube do letterclub e receba, toda semana, as cartas mais curtidas do mural no seu e-mail. De graça.',
     },
     Caixa: {
       route: '/caixa/',

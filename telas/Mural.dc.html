@@ -211,6 +211,141 @@ class Component extends DCLogic {
   withStamps(map, list) {
     return list.map((l) => Object.assign({}, l, { stamp: map[l.id] || 'sol' }));
   }
+  shareBgs() {
+    return [
+      { label: 'Fundo vermelho', bg: '#c23b32', fg: '#ffffff' },
+      { label: 'Fundo creme', bg: '#fbf3ea', fg: '#3a2620' },
+      { label: 'Fundo ocre', bg: '#d9a441', fg: '#3a2620' }
+    ];
+  }
+  sharedLetter() {
+    const all = this.data();
+    return all.find((l) => l.id === (this.state && this.state.shareId)) || all[0];
+  }
+  // ---- compartilhar: a carta vira PNG no próprio navegador (1080×1920 Stories ou 1080×1350 feed) ----
+  async drawShare(l, fmt, bg) {
+    const W = 1080;
+    const H = fmt === 0 ? 1920 : 1350;
+    const fam = l.pen.family.split(',')[0].trim();
+    const host = (window.location.host || 'letterclub.io').replace(/^www\./, '').toUpperCase();
+    const SERIF = "'Instrument Serif', Georgia, serif";
+    const MONO = "500 26px 'IBM Plex Mono', monospace";
+    let scale = 2.3;
+    const fontPx = () => Math.round(parseFloat(l.pen.size) * scale);
+    const lineH = () => Math.round(36 * scale);
+    await Promise.all([
+      document.fonts.load(fontPx() + 'px ' + fam, l.text),
+      document.fonts.load('88px ' + SERIF, 'letterclub'),
+      document.fonts.load(MONO, host),
+      document.fonts.load("44px 'Homemade Apple'", l.city)
+    ]).catch(() => {});
+    const cv = document.createElement('canvas');
+    cv.width = W; cv.height = H;
+    const ctx = cv.getContext('2d');
+    const cardW = 880; const pad = 70; const textW = cardW - pad * 2;
+    const wrap = () => {
+      ctx.font = fontPx() + 'px ' + fam;
+      const out = [];
+      String(l.text).split('\n').forEach((para) => {
+        let line = '';
+        para.split(/\s+/).forEach((w) => {
+          const test = line ? line + ' ' + w : w;
+          if (ctx.measureText(test).width > textW && line) { out.push(line); line = w; } else line = test;
+        });
+        out.push(line);
+      });
+      return out;
+    };
+    const room = H - (fmt === 0 ? 560 : 400);
+    let lines = wrap();
+    const cardH = () => pad + 80 + 24 + lines.length * lineH() + 24 + lineH() + pad - 20;
+    while (cardH() > room && scale > 1.2) { scale -= 0.1; lines = wrap(); }
+    // fundo, marca e rodapé
+    ctx.fillStyle = bg.bg; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = bg.fg; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    ctx.font = '88px ' + SERIF;
+    ctx.fillText('letterclub', W / 2, fmt === 0 ? 210 : 140);
+    ctx.font = MONO;
+    if ('letterSpacing' in ctx) ctx.letterSpacing = '5px';
+    ctx.fillText('ESCREVA A SUA EM ' + host, W / 2, H - (fmt === 0 ? 150 : 90));
+    if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+    // a carta, levemente torta, com sombra de papel sobre a mesa
+    const ch = cardH(); const x = (W - cardW) / 2; const y = (H - ch) / 2 + (fmt === 0 ? 10 : 0);
+    ctx.save();
+    ctx.translate(W / 2, y + ch / 2); ctx.rotate(-0.025); ctx.translate(-W / 2, -(y + ch / 2));
+    ctx.shadowColor = 'rgba(58,38,32,0.28)'; ctx.shadowBlur = 48; ctx.shadowOffsetY = 22;
+    ctx.fillStyle = l.tone.bg;
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(x, y, cardW, ch, 24); else ctx.rect(x, y, cardW, ch);
+    ctx.fill();
+    ctx.shadowColor = 'rgba(58,38,32,0)';
+    ctx.textAlign = 'left';
+    ctx.fillStyle = l.tone.muted; ctx.font = MONO;
+    if ('letterSpacing' in ctx) ctx.letterSpacing = '4px';
+    ctx.fillText((l.city + ' · ' + l.hour).toUpperCase(), x + pad, y + pad + 26);
+    ctx.fillText(String(l.date || '').toUpperCase(), x + pad, y + pad + 62);
+    if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+    let ty = y + pad + 80 + 24;
+    lines.forEach((ln) => {
+      ctx.strokeStyle = l.tone.rule; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(x + pad, ty + lineH() - 6); ctx.lineTo(x + cardW - pad, ty + lineH() - 6); ctx.stroke();
+      ctx.fillStyle = l.tone.fg; ctx.font = fontPx() + 'px ' + fam;
+      ctx.fillText(ln, x + pad, ty + lineH() * 0.72);
+      ty += lineH();
+    });
+    ctx.fillStyle = l.tone.sig; ctx.font = Math.round(22 * scale) + "px 'Homemade Apple'";
+    ctx.textAlign = 'right';
+    ctx.fillText('— alguém de ' + l.city, x + cardW - pad, ty + 24 + lineH() * 0.72);
+    ctx.restore();
+    const blob = await new Promise((res, rej) => cv.toBlob((b) => (b ? res(b) : rej(new Error('toBlob'))), 'image/png'));
+    const slug = l.city.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    return new File([blob], 'letterclub-' + slug + '.png', { type: 'image/png' });
+  }
+  // gera (e guarda) a imagem assim que o diálogo abre: o clique em compartilhar já encontra pronta,
+  // e o navigator.share continua dentro do gesto do usuário (exigência do Safari/Chrome)
+  shareFile() {
+    const st = this.state || {};
+    const l = this.sharedLetter();
+    const key = [l.id, st.format || 0, st.bg || 0].join(':');
+    if (this.shareCache && this.shareCache.key === key) return this.shareCache.promise;
+    const promise = this.drawShare(l, st.format || 0, this.shareBgs()[st.bg || 0]);
+    this.shareCache = { key, promise };
+    promise.catch(() => { this.shareCache = null; });
+    return promise;
+  }
+  saveFile(file) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(file); a.download = file.name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  }
+  shareTo(kind) {
+    const l = this.sharedLetter();
+    const url = window.location.origin + '/mural/#carta-' + l.id;
+    const msg = 'Uma carta de alguém de ' + l.city + ', no letterclub:';
+    // sem Web Share (computador): WhatsApp abre na hora, ainda dentro do clique, pra não cair no bloqueio de pop-up
+    if (kind === 'whatsapp' && !navigator.share) {
+      window.open('https://wa.me/?text=' + encodeURIComponent(msg + ' ' + url), '_blank', 'noopener');
+      return;
+    }
+    this.shareFile().then((file) => {
+      const canFiles = !!(navigator.canShare && navigator.canShare({ files: [file] }));
+      if (kind === 'download' || !canFiles) {
+        if (kind === 'whatsapp') { window.open('https://wa.me/?text=' + encodeURIComponent(msg + ' ' + url), '_blank', 'noopener'); return; }
+        this.saveFile(file);
+        this.say(kind === 'download' ? 'Imagem salva. É só postar onde quiser.' : 'Imagem baixada. Abra o Instagram e poste nos Stories ou no feed.');
+        return;
+      }
+      const data = kind === 'whatsapp' ? { files: [file], text: msg + ' ' + url } : { files: [file] };
+      navigator.share(data).then(() => {
+        if (kind === 'instagram') this.say('Pronto. Se o Instagram não apareceu na lista, a imagem também dá pra baixar.');
+      }, (e) => {
+        if (e && e.name === 'AbortError') return;
+        this.saveFile(file);
+        this.say('Não deu pra abrir o compartilhamento. Baixamos a imagem pra você.');
+      });
+    }, () => this.say('Não deu pra gerar a imagem agora. Tente de novo.'));
+  }
   renderVals() {
     const st = this.state || {};
     const favs = st.favs || {};
@@ -257,7 +392,7 @@ class Component extends DCLogic {
             this.say('Não deu pra guardar agora. Tente de novo.');
           });
         },
-        share: () => this.setState({ shareId: l.id, toast: '' })
+        share: () => this.setState({ shareId: l.id, toast: '' }, () => this.shareFile().catch(() => {}))
       };
     });
     const shared = all.find((l) => l.id === st.shareId) || all[0];
@@ -265,11 +400,7 @@ class Component extends DCLogic {
       { name: 'Stories 9:16', w: '270px', h: '480px', label: 'Stories · 1080 × 1920' },
       { name: 'Feed 4:5', w: '300px', h: '375px', label: 'Feed · 1080 × 1350' }
     ];
-    const BGS = [
-      { label: 'Fundo vermelho', bg: '#c23b32', fg: '#ffffff' },
-      { label: 'Fundo creme', bg: '#fbf3ea', fg: '#3a2620' },
-      { label: 'Fundo ocre', bg: '#d9a441', fg: '#3a2620' }
-    ];
+    const BGS = this.shareBgs();
     const fmt = st.format || 0;
     const bgi = st.bg || 0;
     const favCount = Object.keys(favs).length;
@@ -302,18 +433,18 @@ class Component extends DCLogic {
         name: f.name, selected: i === fmt ? 'true' : 'false',
         bg: i === fmt ? '#fffaf4' : 'transparent',
         shadow: i === fmt ? '0 1px 2px rgba(58,38,32,0.12)' : 'none',
-        pick: () => this.setState({ format: i })
+        pick: () => this.setState({ format: i }, () => this.shareFile().catch(() => {}))
       })),
       shareBg: BGS[bgi],
       bgs: BGS.map((b, i) => ({
         label: b.label, bg: b.bg, selected: i === bgi ? 'true' : 'false',
         ring: i === bgi ? '0 0 0 2px #fbf3ea, 0 0 0 4px #3a2620' : 'inset 0 0 0 1px rgba(58,38,32,0.18)',
-        pick: () => this.setState({ bg: i })
+        pick: () => this.setState({ bg: i }, () => this.shareFile().catch(() => {}))
       })),
       instagramLabel: fmt === 0 ? 'Compartilhar nos Stories' : 'Compartilhar no feed do Instagram',
-      shareInstagram: () => this.say(fmt === 0 ? 'Imagem pronta. No celular, o Instagram abre direto nos Stories.' : 'Imagem pronta. No celular, o Instagram abre pra você postar no feed.'),
-      download: () => this.say('Imagem salva. É só postar onde quiser.'),
-      whatsapp: () => this.say('Abrindo o WhatsApp com a imagem e o link da carta.'),
+      shareInstagram: () => this.shareTo('instagram'),
+      download: () => this.shareTo('download'),
+      whatsapp: () => this.shareTo('whatsapp'),
       copyLink: () => {
         const url = window.location.origin + '/mural/#carta-' + shared.id;
         const fail = () => this.say('Não deu pra copiar. O link é ' + url);
