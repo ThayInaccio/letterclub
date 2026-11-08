@@ -5,9 +5,10 @@
   "scripts": {
     "build": "node build/build.mjs",
     "dev": "node build/build.mjs && esbuild --servedir=dist --serve=8080",
-    "test": "node tests/ds-lint.test.mjs && node tests/api.test.mjs && node tests/smoke.mjs"
+    "test": "node tests/ds-lint.test.mjs && node tests/temas.test.mjs && node tests/api.test.mjs && node tests/smoke.mjs"
   },
   "dependencies": {
+    "@resvg/resvg-js": "2.6.2",
     "nodemailer": "10.2.1",
     "pg": "8.23.1",
     "preact": "11.1.1",

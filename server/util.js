@@ -43,3 +43,12 @@ export function arrived(d, now = new Date()) {
   if (key(d) === key(new Date(now.getTime() - 864e5))) return 'CHEGOU ONTEM';
   return 'CHEGOU ' + fmtShort(d);
 }
+
+// ---- respostas que não são JSON (páginas, sitemap, imagem) ----
+export const RAW = Symbol('raw');
+const TYPES = { html: 'text/html; charset=utf-8', xml: 'application/xml; charset=utf-8', png: 'image/png' };
+// cache: segundos de Cache-Control público (0 = no-cache, para quem publica ver a mudança na hora)
+export function raw(type, body, { status = 200, cache = 0, headers = {} } = {}) {
+  return { [RAW]: true, status, body, headers: {
+    'Content-Type': TYPES[type], 'Cache-Control': cache ? `public, max-age=${cache}` : 'no-cache', ...headers } };
+}

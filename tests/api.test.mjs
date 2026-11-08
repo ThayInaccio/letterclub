@@ -130,7 +130,7 @@ if (process.env.MAIL_DIR) {
     const weekly = await waitMail(mail, /A Caixa da semana/);
     assert.equal(weekly.length, 1, 'Caixa semanal chegou');
     assert.match(weekly[0], /List-Unsubscribe-Post: List-Unsubscribe=One-Click/);
-    assert.match(weekly[0], /\/mural\/#carta-/, 'Caixa linka as cartas no mural');
+    assert.match(weekly[0], /\/carta\/\d+-[a-z0-9-]+\//, 'Caixa linka a página de cada carta');
     run();
     await new Promise((r) => setTimeout(r, 500));
     assert.equal(inbox(mail).filter((m) => /A Caixa da semana/.test(m)).length, 1, 'rodar de novo não manda duas vezes');
@@ -139,6 +139,70 @@ if (process.env.MAIL_DIR) {
     assert.match((await redirect('GET', '/api/clube/sair?t=' + u)).location, /saiu=1/);
   }
 }
+
+// ---- páginas públicas (SEO), moderação e denúncia ----
+const get = async (path) => {
+  const res = await fetch(BASE + path, { redirect: 'manual' });
+  return { status: res.status, type: res.headers.get('content-type'), location: res.headers.get('location'), text: await res.text() };
+};
+assert.equal((await A('POST', '/api/cartas', { ...letter('oi'), theme: 'outro' })).status, 400, 'tema fora da lista');
+const amor = 'carta de amor ' + Date.now() + ' — a gente se viu uma vez só e eu lembro do casaco verde';
+const am = await A('POST', '/api/cartas', { ...letter(amor), theme: 'amor' });
+assert.equal(am.status, 201);
+const pub = await A('POST', `/api/cartas/${am.body.id}/mural`, { published: true });
+assert.match(pub.body.url, /^\/carta\/\d+-carta-de-amor-\d+/, 'publicar devolve a página da carta');
+const url = pub.body.url;
+assert.equal((await A('GET', '/api/caixa')).body.sent.find((l) => l.id === am.body.id).url, url, 'caixa mostra a página');
+const inMural = (await anon('GET', '/api/mural')).body.letters.find((l) => l.id === am.body.id);
+assert.deepEqual([inMural.url, inMural.theme], [url, 'amor']);
+
+let pg = await get(url);
+assert.equal(pg.status, 200);
+assert.match(pg.type, /text\/html/);
+assert.ok(pg.text.includes('casaco verde'), 'página tem o texto da carta');
+assert.match(pg.text, /<meta name="robots" content="noindex, follow">/, 'pendente de moderação fica fora do Google');
+assert.match(pg.text, /"@type":"BreadcrumbList"/);
+assert.ok(!(await get('/sitemap-cartas.xml')).text.includes(url), 'pendente fora do sitemap');
+assert.equal((await get(url.replace(/-[a-z0-9-]+\/$/, '-errado/'))).location, url, 'slug errado → 301 pro canônico');
+assert.equal((await get(url.slice(0, -1))).status, 301, 'sem barra → 301');
+const og = await fetch(BASE + '/og/carta/' + /\/carta\/(\d+)/.exec(url)[1] + '.png');
+assert.equal(og.headers.get('content-type'), 'image/png', 'imagem de prévia');
+assert.equal((await get('/carta/999999999/')).status, 404);
+assert.equal((await get('/temas/nao-existe/')).status, 404);
+assert.equal((await get('/sitemap.xml')).status, 200);
+
+if (process.env.ADMIN_TOKEN) {
+  const admin = (method, path, body, token = process.env.ADMIN_TOKEN) => fetch(BASE + '/api/admin' + path, {
+    method, headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' }, body: body && JSON.stringify(body) })
+    .then(async (r) => ({ status: r.status, body: await r.json() }));
+  assert.equal((await admin('GET', '/fila', undefined, 'errado')).status, 401, 'token errado');
+  const fila = await admin('GET', '/fila');
+  assert.ok(fila.body.cartas.some((c) => c.id === am.body.id), 'carta nova na fila de moderação');
+  assert.equal((await admin('POST', `/cartas/${am.body.id}`, { acao: 'aprovar', theme: 'amizade' })).status, 200);
+  pg = await get(url);
+  assert.match(pg.text, /<meta name="robots" content="index, follow/, 'aprovada entra no Google');
+  assert.ok((await get('/sitemap-cartas.xml')).text.includes(url), 'aprovada no sitemap');
+  assert.ok((await get('/temas/cartas-para-amigos/')).text.includes(url), 'moderação trocou o tema e a carta aparece na página do tema');
+  assert.ok(!(await admin('GET', '/fila')).body.cartas.some((c) => c.id === am.body.id), 'aprovada sai da fila');
+} else {
+  assert.equal((await get('/moderar')).status, 404, 'sem ADMIN_TOKEN não existe moderação');
+}
+
+// tirar do mural: a página some (410, o Google remove mais rápido que 404)
+await A('POST', `/api/cartas/${am.body.id}/mural`, { published: false });
+assert.equal((await get(url)).status, 410);
+await A('POST', `/api/cartas/${am.body.id}/mural`, { published: true });
+assert.equal((await get(url)).status, 200);
+
+// denúncia: uma por pessoa; na terceira a carta sai do ar até revisar
+const R1 = person();
+assert.equal((await R1('POST', `/api/mural/${am.body.id}/denunciar`, {})).status, 200);
+await R1('POST', `/api/mural/${am.body.id}/denunciar`, {});
+assert.equal((await get(url)).status, 200, 'a mesma pessoa não conta duas vezes');
+for (const R of [person(), person()]) await R('POST', `/api/mural/${am.body.id}/denunciar`, {});
+assert.equal((await get(url)).status, 410, 'três denúncias tiram do ar');
+assert.ok(!(await anon('GET', '/api/mural')).body.letters.some((l) => l.id === am.body.id), 'sai do mural');
+assert.equal((await A('GET', '/api/caixa')).body.sent.find((l) => l.id === am.body.id).url, null, 'autor não vê link da página');
 
 // correio físico desligado até existir gateway de pagamento (FEATURE_CORREIO)
 assert.equal((await A('POST', '/api/pedidos', { email: mail })).status, 404, 'pedidos do correio fora do ar');

@@ -10,6 +10,7 @@ import { h } from 'preact';
 import { renderToString } from 'preact-render-to-string';
 import site from '../site.config.mjs';
 import { lintDS } from './ds-lint.mjs';
+import { analyticsTag } from '../server/analytics.js';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const SRC = path.join(ROOT, 'telas');
@@ -149,11 +150,16 @@ ${cfg.index === false ? '<meta name="robots" content="noindex, follow">' : ''}
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(cfg.description)}">
 <meta property="og:url" content="${esc(url)}">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="${SITE_URL}/og/site.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 ${headExtras(name)}
 ${jsonLd}
+${analyticsTag()}
 <script type="module" src="${scriptOf[name]}"></script>
 </head>
 <body>
@@ -174,10 +180,15 @@ ${jsonLd}
   console.log(`✓ ${cfg.route.padEnd(12)} ${(page.length / 1024).toFixed(1)} KB`);
 }
 
-fs.writeFileSync(path.join(DIST, 'sitemap.xml'),
+// /sitemap.xml é um índice servido pela API: aponta para este arquivo (páginas fixas) e para as cartas e temas.
+fs.writeFileSync(path.join(DIST, 'sitemap-paginas.xml'),
   `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
   sitemap.map((u) => `  <url><loc>${esc(u)}</loc></url>`).join('\n') + `\n</urlset>\n`);
 fs.writeFileSync(path.join(DIST, 'robots.txt'),
   // sem Disallow: o crawler precisa abrir /caixa/ para ver o noindex
   `User-agent: *\nAllow: /\nSitemap: ${SITE_URL}/sitemap.xml\n`);
-console.log(`✓ sitemap.xml (${sitemap.length} urls), robots.txt → dist/`);
+// favicon: o lacre do envelope (círculo coral com o "l")
+fs.writeFileSync(path.join(DIST, 'favicon.svg'),
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="${site.themeColor}"/>` +
+  `<text x="32" y="46" text-anchor="middle" font-family="Georgia, serif" font-style="italic" font-size="40" fill="#fbf3ea">l</text></svg>\n`);
+console.log(`✓ sitemap-paginas.xml (${sitemap.length} urls), robots.txt, favicon.svg → dist/`);

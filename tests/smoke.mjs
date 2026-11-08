@@ -135,7 +135,11 @@ check(!!firstEnvelope, 'caixa: sem carta fechada para abrir');
 if (firstEnvelope) { await ev(click(firstEnvelope, 0)); await sleep(400); }
 await ev(click('Enviadas', 0)); await sleep(300);
 check(await ev(`document.body.innerText.includes(${JSON.stringify(unique)})`), 'caixa: carta enviada não aparece');
-await ev(`[...document.querySelectorAll('#app button')].find(b=>b.textContent.includes('Pendurar no mural')).click()`); await sleep(600);
+await ev(`[...document.querySelectorAll('#app button')].find(b=>b.textContent.includes('Pendurar no mural')).click()`); await sleep(400);
+// antes de pendurar, avisa que a carta fica pública (inclusive no Google)
+check(await ev(`/vai ficar pública/.test(document.body.innerText) && /Google/.test(document.body.innerText)`), 'caixa: pendurar sem o aviso de carta pública');
+await ev(click('Pendurar e deixar pública', 0)); await sleep(600);
+check(await ev(`!![...document.querySelectorAll('#app a')].find(a=>/^\\/carta\\/\\d+-/.test(a.getAttribute('href')||''))`), 'caixa: sem link para a página da carta');
 await go('/caixa/'); await sleep(500);
 if (firstEnvelope) check(await ev(`!![...document.querySelectorAll('#app button')].find(b=>b.getAttribute('aria-label')===${JSON.stringify(firstEnvelope.replace('Abrir', 'Reler'))})`), 'caixa: carta aberta volta fechada');
 await ev(click('Enviadas', 0)); await sleep(300);
@@ -173,15 +177,14 @@ check((await fetch(BASE + '/correio/')).status === 404, '/correio/ ainda publica
 await go('/mural/'); await ev(click('Compartilhar', 0)); await sleep(300); await ev(click('Copiar link', 0)); await sleep(400);
 check(await ev(`document.body.innerText.includes('Link copiado.')`), 'mural: copiar link não confirma');
 const copied = await ev('navigator.clipboard.readText()').catch(() => '');
-check(/\/mural\/#carta-[\w-]+$/.test(copied), `mural: link copiado inválido (${copied || 'área de transferência vazia'})`);
+check(/\/carta\/\d+-[a-z0-9-]+\/$/.test(copied), `mural: link copiado inválido (${copied || 'área de transferência vazia'})`);
 if (copied) { // sem o link, o resto do teste ainda roda
-  await go(new URL(copied).pathname + new URL(copied).hash);
-  check(await ev(`!!document.getElementById(${JSON.stringify(new URL(copied).hash.slice(1))})`), 'mural: âncora do link copiado não existe');
+  check((await fetch(copied)).status === 200, 'mural: página do link copiado não abre');
 }
 
 // compartilhar no WhatsApp (sem Web Share, como no computador): abre o wa.me com o link da carta
 await go('/mural/'); await ev(click('Compartilhar', 0)); await sleep(300); await ev(click('WhatsApp', 0)); await sleep(300);
-check(await ev(`(window.__opened||[]).some(u=>/^https:\\/\\/wa\\.me\\/\\?text=.*mural.*carta-/.test(decodeURIComponent(u)))`), 'mural: WhatsApp não abre com o link da carta');
+check(await ev(`(window.__opened||[]).some(u=>/^https:\\/\\/wa\\.me\\/\\?text=.*\\/carta\\/\\d+-/.test(decodeURIComponent(u)))`), 'mural: WhatsApp não abre com o link da carta');
 
 // compartilhar: a imagem é gerada de verdade e baixada como PNG
 const dl = fs.mkdtempSync(path.join(os.tmpdir(), 'lc-dl-'));
