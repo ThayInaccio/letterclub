@@ -28,7 +28,7 @@ letterclub/
     ├── Escrever.dc.html # editor com prévia em tempo real, ditado por voz e rascunho automático
     ├── Mural.dc.html    # mural público, favoritar e compartilhar (Stories/feed)
     ├── Caixa.dc.html    # caixa de correio: recebidas, enviadas, rascunhos
-    ├── Correio.dc.html  # checkout pra mandar a carta pelo correio de verdade
+    ├── Correio.dc.html  # checkout do correio físico — oculto (site.config `hidden`) até haver pagamento
     ├── Clube.dc.html    # assinatura: newsletter, conteúdo exclusivo, 2 cartas/mês
     ├── CartasSecao.dc.html  # componente: conceito + carrossel (usado na home e em Cartas)
     └── Selo.dc.html         # componente: selo postal (12 desenhos)
@@ -61,7 +61,9 @@ BASE_URL=http://localhost:8080 npm test   # lint do DS + API + clique em tudo no
 - **Identidade anônima**: ninguém cria conta. Na primeira ação, o navegador recebe um cookie `lc_sid` (`HttpOnly`, `SameSite=Lax`, `Secure`) com um token aleatório; o banco guarda só o hash. O cookie é a caixa de correio: se a pessoa limpar o navegador, a caixa some.
 - **Entrega**: a carta fica pronta 2 dias depois de enviada. Quem abre a Caixa recebe a carta pronta mais antiga de outra pessoa, no máximo uma por dia. O sorteio usa `FOR UPDATE SKIP LOCKED`, então várias réplicas nunca entregam a mesma carta.
 - **Mural**: só quem escreveu pendura a própria carta. Favoritar manda o estado desejado (não "inverter"), então clique duplo não conta duas vezes.
-- **Correio e clube**: o total do pedido é sempre calculado no servidor (`server/pedidos.js`). Dados de cartão nunca chegam ao servidor.
+- **Clube (grátis)**: inscrição só com e-mail e confirmação dupla (link de uso único, vale 7 dias, não reenvia antes de 2 min). Toda sexta, `server/semanal.js` manda a Caixa: as 5 cartas do mural mais favoritadas nos últimos 7 dias. É idempotente por semana (`digest_sends`): rodar de novo só completa quem faltou. Todo e-mail tem link de saída e `List-Unsubscribe` one-click (Gmail/Apple Mail).
+- **E-mail**: `server/mailer.js` envia por SMTP (Hostinger, Gmail, SES, Resend…). Sem `SMTP_HOST` nada sai: a inscrição funciona, mas confirmação e Caixa só aparecem no log.
+- **Correio físico (desligado)**: `/api/pedidos` só existe com `FEATURE_CORREIO=true`; o total é sempre calculado no servidor (`server/pedidos.js`).
 - **Banco**: `server/schema.sql` é idempotente e roda a cada boot sob advisory lock; o mural começa com o acervo do protótipo.
 - **Proteções**: só aceita `application/json` (bloqueia CSRF por formulário), corpo até 16 KB, validação de todo campo, 20 cartas por dia por sessão, limite por IP no nginx.
 
@@ -73,10 +75,14 @@ BASE_URL=http://localhost:8080 npm test   # lint do DS + API + clique em tudo no
 | POST | `/api/cartas/:id/abrir` · `/guardar` · `/mural` | abrir, guardar, pendurar no mural |
 | GET | `/api/mural` | cartas públicas (não cria sessão) |
 | POST | `/api/mural/:id/favorito` | favoritar `{ fav: true\|false }` |
-| POST | `/api/clube` | entrar no clube |
-| POST | `/api/pedidos` | pedido do correio |
+| POST | `/api/clube` | entrar no clube `{ email, city? }` → manda o e-mail de confirmação |
+| GET | `/api/clube/confirmar?t=` | link do e-mail → confirma e volta para `/clube/?confirmado=1` |
+| GET · POST | `/api/clube/sair?t=` | sair do clube (link do e-mail e one-click) |
+| POST | `/api/pedidos` | pedido do correio (só com `FEATURE_CORREIO=true`) |
 
-Variáveis da API: `DATABASE_URL` (obrigatória; em produção vem do Secrets Manager / External Secrets, com `sslmode=verify-full` no RDS), `PORT` (3000), `COOKIE_SECURE` (`false` só em http local), `DELIVERY_DELAY_SECONDS` (172800), `LETTERS_PER_DAY` (20), `DB_POOL_MAX` (10).
+Variáveis da API: `DATABASE_URL` (obrigatória; em produção vem do Secrets Manager / External Secrets, com `sslmode=verify-full` no RDS), `PORT` (3000), `COOKIE_SECURE` (`false` só em http local), `DELIVERY_DELAY_SECONDS` (172800), `LETTERS_PER_DAY` (20), `DB_POOL_MAX` (10), `SITE_URL` (links dos e-mails), `SMTP_HOST`, `SMTP_PORT` (465), `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` (`letterclub <cartas@letterclub.io>`), `DIGEST_SIZE` (5), `FEATURE_CORREIO` (desligado).
+
+Caixa semanal: `node server/semanal.js` (envia) ou `node server/semanal.js --previa` (só mostra quais cartas iriam).
 
 ## Docker
 
@@ -91,13 +97,14 @@ docker build --build-arg SITE_URL=https://seu-dominio -t letterclub-web:<versão
 
 ## Deploy no Railway
 
-Projeto `talented-emotion`, ambiente `production`, três serviços. `web` e `api` saem deste repositório (branch `main`, deploy automático a cada push):
+Projeto `talented-emotion`, ambiente `production`, quatro serviços. `web`, `api` e `semanal` saem deste repositório (branch `main`, deploy automático a cada push). Domínio: `letterclub.io` e `www.letterclub.io` (DNS na Hostinger).
 
-| Serviço | Público? | Variáveis | Health check |
+| Serviço | Público? | Variáveis | Health check / agenda |
 |---|---|---|---|
 | **Postgres** | não | (do Railway) | — |
-| **api** | não, só rede privada | `DATABASE_URL=${{Postgres.DATABASE_URL}}`, `PORT=3000`, `RAILWAY_DOCKERFILE_PATH=Dockerfile.api` | `/api/health` |
-| **web** | sim, porta 8080 | `SITE_URL=https://${{RAILWAY_PUBLIC_DOMAIN}}`, `API_UPSTREAM=http://${{api.RAILWAY_PRIVATE_DOMAIN}}:3000`, `PORT=8080`, `RAILWAY_DOCKERFILE_PATH=Dockerfile` | `/healthz` |
+| **api** | não, só rede privada | `DATABASE_URL=${{Postgres.DATABASE_URL}}`, `PORT=3000`, `RAILWAY_DOCKERFILE_PATH=Dockerfile.api`, `SITE_URL=https://letterclub.io`, `SMTP_*`, `MAIL_FROM` | `/api/health` |
+| **web** | sim, porta 8080 | `SITE_URL=https://letterclub.io`, `API_UPSTREAM=http://${{api.RAILWAY_PRIVATE_DOMAIN}}:3000`, `PORT=8080`, `RAILWAY_DOCKERFILE_PATH=Dockerfile` | `/healthz` |
+| **semanal** | não | as mesmas da `api`; start command `node server/semanal.js` | cron `47 11 * * 5` (sexta, 8h47 em Brasília) |
 
 - A configuração fica na interface do Railway (o config-as-code em arquivo foi descontinuado por eles).
 - `Dockerfile.api` existe porque o Railway não escolhe um `--target`; mantenha igual ao estágio `api` do `Dockerfile`.
@@ -115,7 +122,7 @@ Projeto `talented-emotion`, ambiente `production`, três serviços. `web` e `api
 
 1. **Home** → abertura no estilo "sistema operacional carregando", pôster com a carta saindo do envelope.
 2. **Escrever** → escolhe caneta (cursiva, pena fina, letra de forma), papel e cidade; vê a carta se escrevendo do lado; pode ditar por voz; o rascunho se salva sozinho.
-3. **Enviar** → a carta vai pra alguém do clube (chega em 2 dias) — ou **pelo correio**, com papelaria, calígrafo, fotos e adicionais.
+3. **Enviar** → a carta vai pra alguém do clube (chega em 2 dias).
 4. **Caixa** → recebidas (envelopes que abrem), enviadas (com opção de pendurar no mural) e rascunhos.
 5. **Mural** → cartas públicas, favoritas e compartilhamento como imagem.
 6. **Clube** → plano Leitor (grátis) e Membro (newsletter quinzenal, textos inéditos, 2 cartas por mês em casa).
@@ -129,14 +136,12 @@ Projeto `talented-emotion`, ambiente `production`, três serviços. `web` e `api
 
 ## Pendências para a implementação
 
-- **Pagamentos**: gateway ainda a decidir (Mercado Pago × Stripe). Hoje pedidos do correio e membros do clube ficam `aguardando_pagamento`: nada é cobrado. Falta trocar os campos de cartão do Correio pelos campos seguros do gateway (tokenização no navegador), chamar o gateway em `server/pedidos.js` e `server/clube.js` e receber webhooks idempotentes.
-- **E-mail**: nenhum e-mail é enviado (confirmação do clube, aviso de postagem). Falta integrar SES e confirmação dupla do e-mail.
+- **Pagamentos**: gateway ainda a decidir (Mercado Pago × Stripe). Por isso o correio físico está oculto (tela fora do build, rota atrás de `FEATURE_CORREIO`) e o clube é só o plano grátis. Falta trocar os campos de cartão do Correio pelos campos seguros do gateway (tokenização no navegador), chamar o gateway em `server/pedidos.js` e `server/clube.js` e receber webhooks idempotentes.
 - **Moderação**: cartas penduradas no mural ficam públicas na hora. Antes de abrir para muita gente: botão de denúncia e fila de revisão. Hoje, para tirar uma carta: `UPDATE letters SET published_at = NULL WHERE id = '...'`.
 - **LGPD**: e-mails e endereços ficam em `members` e `orders`; falta política de retenção e exclusão a pedido.
-- **Preços**: todos os valores no protótipo são de exemplo.
+- **Preços**: todos os valores do correio (ocultos) são de exemplo.
 - **Caligrafia traço a traço**: síntese neural exige modelo próprio (os modelos públicos não têm licença comercial e usam dados só para pesquisa). Plano: coletar letra de calígrafos e treinar modelo próprio, servido em `POST /handwriting`.
-- **Compartilhar imagem** (Stories, baixar, WhatsApp) só mostra o aviso; ainda não gera a imagem. **Fotos** do correio: só a contagem; o upload (S3) não existe.
+- **Fotos** do correio: só a contagem; o upload (S3) não existe.
 - **Imagem social e favicon**: não existem; falta `og:image` (1200×630) e o ícone.
 - **Rascunho**: continua no navegador. Como a identidade também é do aparelho (cookie), levar o rascunho ao servidor só faz sentido quando houver login entre aparelhos.
-- **Correio físico e clube**: opt-in para receber cartas em casa; job agendado para os envios dos dias 5 e 20; fluxo de curadoria.
-- **Escritores convidados** e o poema de exemplo no clube são placeholders.
+- **Correio físico e plano pago do clube**: opt-in para receber cartas em casa, envios dos dias 5 e 20, curadoria e escritores convidados — tudo depende do pagamento.
