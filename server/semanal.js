@@ -27,10 +27,10 @@ function weekKey(now = new Date()) {
 async function topLetters() {
   // mais favoritadas nos últimos 7 dias; empate → mais guardadas no total → mais recentes
   const { rows } = await q(
-    `SELECT l.id, l.city, l.hour, l.paper, l.text,
+    `SELECT l.id, l.num, l.city, l.hour, l.paper, l.text,
             count(f.letter_id) FILTER (WHERE f.created_at > now() - interval '7 days') AS week_favs
      FROM letters l LEFT JOIN favorites f ON f.letter_id = l.id
-     WHERE l.published_at IS NOT NULL
+     WHERE l.published_at IS NOT NULL AND l.mod_status <> 'oculta'
      GROUP BY l.id
      ORDER BY week_favs DESC, l.saves DESC, l.published_at DESC
      LIMIT $1`, [SIZE]);

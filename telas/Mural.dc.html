@@ -44,6 +44,15 @@ a{color:#c23b32}a:hover{color:#3a2620}
 <p style="margin: 0; font-family: 'IBM Plex Mono', Menlo, monospace; font-size: 11px; line-height: 16px; letter-spacing: 0.14em; font-weight: 500; color: #c23b32;">O MURAL</p>
 <h1 style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: clamp(48px, 5vw, 72px); line-height: 1; letter-spacing: -0.02em;">Cartas que alguém <em style="font-style: italic; color: #c23b32;">quis</em> deixar à vista.</h1>
 <p style="margin: 0; font-size: 17px; line-height: 27px; color: #7a5a4e;">Todas chegaram na caixa de alguém primeiro. Depois, quem escreveu decidiu pendurar aqui.</p>
+<nav aria-label="Cartas por tema" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 4px;">
+<span style="font-size: 14px; line-height: 20px; color: #7a5a4e; margin-right: 4px;">Cartas</span>
+<a href="/temas/cartas-de-amor/" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 14px; border-radius: 999px; background: #f6d9cf; color: #3a2620; font-size: 14px; line-height: 20px; font-weight: 500; text-decoration: none;">de amor</a>
+<a href="/temas/cartas-para-amigos/" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 14px; border-radius: 999px; background: #f6d9cf; color: #3a2620; font-size: 14px; line-height: 20px; font-weight: 500; text-decoration: none;">para amigos</a>
+<a href="/temas/cartas-para-a-familia/" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 14px; border-radius: 999px; background: #f6d9cf; color: #3a2620; font-size: 14px; line-height: 20px; font-weight: 500; text-decoration: none;">para a família</a>
+<a href="/temas/cartas-de-saudade/" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 14px; border-radius: 999px; background: #f6d9cf; color: #3a2620; font-size: 14px; line-height: 20px; font-weight: 500; text-decoration: none;">de saudade</a>
+<a href="/temas/cartas-para-dias-dificeis/" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 14px; border-radius: 999px; background: #f6d9cf; color: #3a2620; font-size: 14px; line-height: 20px; font-weight: 500; text-decoration: none;">para dias difíceis</a>
+<a href="/temas/cartas-para-um-desconhecido/" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 14px; border-radius: 999px; background: #f6d9cf; color: #3a2620; font-size: 14px; line-height: 20px; font-weight: 500; text-decoration: none;">para um desconhecido</a>
+</nav>
 </div>
 <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px;">
 <div role="group" aria-label="Ordem das cartas" style="display: inline-flex; padding: 4px; border-radius: 999px; background: #f6d9cf; gap: 4px;">
@@ -85,6 +94,9 @@ só minhas favoritas
 <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"></path></svg>
 Compartilhar
 </button>
+<sc-if value="{{l.hasUrl}}" hint-placeholder-val="{{ false }}">
+<a href="{{l.url}}" aria-label="{{l.openLabel}}" style="min-height: 44px; padding: 0 12px; border-radius: 999px; color: {{l.fg}}; font-size: 14px; line-height: 44px; font-weight: 500; text-decoration: none;">Abrir</a>
+</sc-if>
 </div>
 </article>
 </sc-for>
@@ -320,7 +332,7 @@ class Component extends DCLogic {
   }
   shareTo(kind) {
     const l = this.sharedLetter();
-    const url = window.location.origin + '/mural/#carta-' + l.id;
+    const url = window.location.origin + (l.url || '/mural/#carta-' + l.id);
     const msg = 'Uma carta de alguém de ' + l.city + ', no letterclub:';
     // sem Web Share (computador): WhatsApp abre na hora, ainda dentro do clique, pra não cair no bloqueio de pop-up
     if (kind === 'whatsapp' && !navigator.share) {
@@ -363,6 +375,9 @@ class Component extends DCLogic {
       return {
         stamp: l.stamp,
         anchor: 'carta-' + l.id,
+        hasUrl: !!l.url,
+        url: l.url || '/mural/',
+        openLabel: 'Abrir a página da carta de ' + l.city,
         aria: 'Carta de ' + l.city + ', ' + l.date,
         postmark: (l.city + ' · ' + l.hour).toUpperCase(),
         date: l.date,
@@ -445,7 +460,7 @@ class Component extends DCLogic {
       download: () => this.shareTo('download'),
       whatsapp: () => this.shareTo('whatsapp'),
       copyLink: () => {
-        const url = window.location.origin + '/mural/#carta-' + shared.id;
+        const url = window.location.origin + (shared.url || '/mural/#carta-' + shared.id);
         const fail = () => this.say('Não deu pra copiar. O link é ' + url);
         try { navigator.clipboard.writeText(url).then(() => this.say('Link copiado.'), fail); } catch (e) { fail(); }
       },

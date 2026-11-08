@@ -5,6 +5,9 @@ import { pool, q, tx, migrate } from './db.js';
 import * as cartas from './cartas.js';
 import * as clube from './clube.js';
 import * as pedidos from './pedidos.js';
+import * as paginas from './paginas.js';
+import * as moderacao from './moderacao.js';
+import { RAW } from './util.js';
 
 const PORT = Number(process.env.PORT || 3000);
 const SECURE = process.env.COOKIE_SECURE !== 'false'; // só desligar em http local
@@ -58,6 +61,20 @@ const routes = [
   ['POST', /^\/api\/cartas\/([^/]+)\/mural$/, async (c) => cartas.publish(await c.session(), c.params[0], await c.body())],
   ['GET', /^\/api\/mural$/, async (c) => cartas.mural(await c.maybeSession())],
   ['POST', /^\/api\/mural\/([^/]+)\/favorito$/, async (c) => cartas.favorite(await c.session(), c.params[0], await c.body())],
+  ['POST', /^\/api\/mural\/([^/]+)\/denunciar$/, async (c) => cartas.report(await c.session(), c.params[0])],
+  // moderação (só com ADMIN_TOKEN)
+  ['GET', /^\/api\/admin\/fila$/, async (c) => { moderacao.auth(c.req); return moderacao.fila(); }],
+  ['POST', /^\/api\/admin\/cartas\/([^/]+)$/, async (c) => { moderacao.auth(c.req); return moderacao.decidir(c.params[0], await c.body()); }],
+  ['GET', /^\/moderar$/, async () => moderacao.pagina()],
+  // páginas públicas para busca e compartilhamento (o nginx repassa estes caminhos para cá)
+  ['GET', /^\/carta\/(\d+)(?:-([a-z0-9-]*))?(\/?)$/, async (c) => paginas.carta(c.params[0], c.params[1] ?? '', c.params[2] === '/')],
+  ['GET', /^\/temas(\/?)$/, async (c) => (c.params[0] ? paginas.temas() : { redirect: '/temas/', permanent: true })],
+  ['GET', /^\/temas\/([a-z0-9-]+)(\/?)$/, async (c) => (c.params[1] ? paginas.tema(c.params[0]) : { redirect: `/temas/${c.params[0]}/`, permanent: true })],
+  ['GET', /^\/og\/carta\/(\d+)\.png$/, async (c) => paginas.ogCarta(c.params[0])],
+  ['GET', /^\/og\/tema\/([a-z0-9-]+)\.png$/, async (c) => paginas.ogTema(c.params[0])],
+  ['GET', /^\/og\/site\.png$/, async () => paginas.ogSite()],
+  ['GET', /^\/sitemap\.xml$/, async () => paginas.sitemapIndex()],
+  ['GET', /^\/sitemap-cartas\.xml$/, async () => paginas.sitemapCartas()],
   ['POST', /^\/api\/clube$/, async (c) => clube.join(await c.body())],
   ['GET', /^\/api\/clube\/confirmar$/, async (c) => clube.confirm(c.query.get('t'))],
   // descadastro: link do e-mail (GET) e one-click do List-Unsubscribe (POST sem JSON, RFC 8058)
@@ -74,8 +91,9 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x');
   const path = url.pathname;
   let status = 200; let out;
+  const method = req.method === 'HEAD' ? 'GET' : req.method; // crawlers usam HEAD
   try {
-    const route = routes.find(([m, re]) => re.test(path) && m === req.method);
+    const route = routes.find(([m, re]) => re.test(path) && m === method);
     if (!route) {
       status = routes.some(([, re]) => re.test(path)) ? 405 : 404;
       out = { error: status === 405 ? 'método não permitido' : 'não encontrado' };
@@ -83,7 +101,7 @@ const server = http.createServer(async (req, res) => {
       const ctx = {
         req, res, params: route[1].exec(path).slice(1), query: url.searchParams,
         body: (() => { let b; return () => (b ??= readJson(req)); })(), // POST lê o corpo antes de criar sessão
-        session: async () => { if (req.method === 'POST') await ctx.body(); return ensureSession(req, res); },
+        session: async () => { if (method === 'POST') await ctx.body(); return ensureSession(req, res); },
         maybeSession: () => findSession(req),
       };
       out = await route[2](ctx);
@@ -94,16 +112,24 @@ const server = http.createServer(async (req, res) => {
     out = { error: status === 500 ? 'erro interno' : e.message };
     if (status === 500) console.error(JSON.stringify({ level: 'error', path, msg: e.message, stack: e.stack }));
   }
-  // handler devolve { redirect: '/caminho' } para links abertos direto do e-mail (só caminhos locais)
+  const log = (st) => console.log(JSON.stringify({ method: req.method, path, status: st, ms: Date.now() - t0 }));
+  // handler devolve { redirect: '/caminho' } para links abertos direto do e-mail (só caminhos locais);
+  // permanent: endereço canônico das páginas públicas (301, o Google passa a usar o novo)
   if (status === 200 && typeof out?.redirect === 'string' && out.redirect.startsWith('/') && !out.redirect.startsWith('//')) {
-    res.writeHead(303, { Location: out.redirect, 'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer' });
+    const st = out.permanent ? 301 : 303;
+    res.writeHead(st, { Location: out.redirect, 'Cache-Control': out.permanent ? 'public, max-age=3600' : 'no-store', 'Referrer-Policy': 'no-referrer' });
     res.end();
-    console.log(JSON.stringify({ method: req.method, path, status: 303, ms: Date.now() - t0 }));
-    return;
+    return log(st);
+  }
+  // página, sitemap ou imagem
+  if (out?.[RAW]) {
+    res.writeHead(out.status, { 'X-Content-Type-Options': 'nosniff', ...out.headers });
+    res.end(req.method === 'HEAD' ? undefined : out.body);
+    return log(out.status);
   }
   res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
   res.end(JSON.stringify(out));
-  console.log(JSON.stringify({ method: req.method, path, status, ms: Date.now() - t0 }));
+  log(status);
 });
 
 await migrate();

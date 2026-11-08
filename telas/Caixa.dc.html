@@ -97,10 +97,23 @@ a{color:#c23b32}a:hover{color:#3a2620}
 <span aria-hidden="true" style="position: relative; width: 40px; height: 24px; border-radius: 999px; background: {{s.trackBg}}; transition: background-color 240ms ease-out;"><span style="position: absolute; top: 3px; left: {{s.knobLeft}}; width: 18px; height: 18px; border-radius: 50%; background: #ffffff; box-shadow: 0 1px 3px rgba(58,38,32,0.3); transition: left 240ms ease-out;"></span></span>
 Pendurar no mural
 </button>
+<sc-if value="{{s.hasUrl}}" hint-placeholder-val="{{ false }}">
+<a href="{{s.url}}" style="flex: 0 0 auto; padding: 12px 0; font-size: 14px; line-height: 20px; font-weight: 500; color: #c23b32;">Ver a página da carta</a>
+</sc-if>
+<sc-if value="{{s.confirming}}" hint-placeholder-val="{{ false }}">
+<div role="alertdialog" aria-labelledby="{{s.confirmId}}" style="flex: 1 1 100%; display: flex; flex-direction: column; gap: 14px; padding: 22px 24px; border-radius: 16px; background: #f6d9cf; animation: lc-rise 300ms ease-out both;">
+<p id="{{s.confirmId}}" style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 28px; line-height: 32px;">Sua carta vai ficar pública.</p>
+<p style="margin: 0; font-size: 15px; line-height: 24px; color: #3a2620;">No mural, qualquer pessoa pode ler, guardar e compartilhar a carta, e ela ganha uma página própria que pode aparecer no Google e em outros buscadores. Seu nome nunca aparece, só a cidade e a hora. Antes de pendurar, confira se não tem nome, telefone ou endereço no texto. Dá pra tirar do mural quando quiser.</p>
+<div style="display: flex; flex-wrap: wrap; gap: 10px;">
+<button type="button" onClick="{{s.confirm}}" style="min-height: 44px; padding: 0 22px; border-radius: 999px; border: 0; background: #c23b32; color: #ffffff; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer;">Pendurar e deixar pública</button>
+<button type="button" onClick="{{s.cancel}}" style="min-height: 44px; padding: 0 22px; border-radius: 999px; border: 1.5px solid #a88676; background: transparent; color: #3a2620; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer;">Agora não</button>
+</div>
+</div>
+</sc-if>
 </li>
 </sc-for>
 </ul>
-<p style="margin: 0; font-size: 13px; line-height: 18px; color: #7a5a4e;">Cartas penduradas no mural aparecem sem nome, só com a cidade e a hora. Dá pra tirar quando quiser.</p>
+<p style="margin: 0; font-size: 13px; line-height: 18px; color: #7a5a4e;">Cartas penduradas no mural são públicas: qualquer pessoa pode ler, e elas podem aparecer no Google. Aparecem sem nome, só com a cidade e a hora. Dá pra tirar quando quiser.</p>
 </sc-if>
 
 <sc-if value="{{isDrafts}}" hint-placeholder-val="{{ false }}">
@@ -163,14 +176,14 @@ Responder
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1200}}'>
 class Component extends DCLogic {
-  state = { tab: 0, opened: {}, reading: null, kept: {}, published: {}, draft: null, inbox: null, sentList: null, failed: false };
+  state = { tab: 0, opened: {}, reading: null, kept: {}, published: {}, urls: {}, confirming: null, draft: null, inbox: null, sentList: null, failed: false };
   componentDidMount() { this.loadDraft(); this.load(); }
   load() {
     this.api('GET', '/caixa').then((d) => {
-      const opened = {}; const kept = {}; const published = {};
+      const opened = {}; const kept = {}; const published = {}; const urls = {};
       d.inbox.forEach((r) => { if (r.opened) opened[r.id] = true; if (r.kept) kept[r.id] = true; });
-      d.sent.forEach((x) => { if (x.published) published[x.id] = true; });
-      this.setState({ inbox: d.inbox, sentList: d.sent, opened, kept, published, failed: false });
+      d.sent.forEach((x) => { if (x.published) published[x.id] = true; if (x.url) urls[x.id] = x.url; });
+      this.setState({ inbox: d.inbox, sentList: d.sent, opened, kept, published, urls, failed: false });
     }, () => this.setState({ failed: true }));
   }
   // muda na hora; se o servidor recusar, volta como estava
@@ -179,6 +192,16 @@ class Component extends DCLogic {
     const next = Object.assign({}, prev, { [id]: !prev[id] });
     this.setState({ [key]: next });
     this.api('POST', path, { [field]: !!next[id] }).catch(() => this.setState({ [key]: prev }));
+  }
+  // pendurar só depois do aviso de que a carta fica pública; tirar do mural é na hora
+  setPublished(id, on) {
+    const st = this.state || {};
+    const prev = st.published || {};
+    const prevUrls = st.urls || {};
+    this.setState({ published: Object.assign({}, prev, { [id]: on }), confirming: null });
+    this.api('POST', '/cartas/' + id + '/mural', { published: on }).then(
+      (d) => this.setState({ urls: Object.assign({}, (this.state && this.state.urls) || {}, { [id]: d.url || null }) }),
+      () => this.setState({ published: prev, urls: prevUrls }));
   }
   loadDraft() {
     try {
@@ -277,7 +300,13 @@ class Component extends DCLogic {
         publishedPressed: on ? 'true' : 'false',
         trackBg: on ? '#c23b32' : '#a88676',
         knobLeft: on ? '19px' : '3px',
-        togglePublish: () => this.flip('published', s.id, '/cartas/' + s.id + '/mural', 'published')
+        togglePublish: () => (on ? this.setPublished(s.id, false) : this.setState({ confirming: st.confirming === s.id ? null : s.id })),
+        confirming: st.confirming === s.id,
+        confirmId: 'lc-publica-' + s.id,
+        confirm: () => this.setPublished(s.id, true),
+        cancel: () => this.setState({ confirming: null }),
+        hasUrl: on && !!(st.urls || {})[s.id],
+        url: (st.urls || {})[s.id] || '/mural/'
       };
     });
 

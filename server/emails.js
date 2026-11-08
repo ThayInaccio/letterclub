@@ -1,6 +1,6 @@
 // Templates dos e-mails do clube. HTML com estilo inline (clientes de e-mail ignoram <style>)
 // e fontes de sistema: Georgia faz o papel da Instrument Serif, já que ninguém carrega webfont em e-mail.
-const SITE = () => (process.env.SITE_URL || 'http://localhost:8080').replace(/\/$/, '');
+import { SITE, letterUrl } from './estilo.js';
 const C = { paper: '#fbf3ea', raised: '#fffaf4', ink: '#3a2620', muted: '#7a5a4e', coral: '#c23b32', line: '#e8d5c6' };
 const PAPERS = [
   { bg: '#fffaf4', fg: '#3a2620' }, { bg: '#f6d9cf', fg: '#3a2620' }, { bg: '#f2b8a2', fg: '#3a2620' },
@@ -35,12 +35,12 @@ Alguém (tomara que você) pediu pra receber a Caixa do letterclub: as cartas ma
 export function weekly(letters, unsubLink, weekLabel) {
   const cards = letters.map((l) => {
     const p = PAPERS[l.paper] || PAPERS[0];
-    const url = `${SITE()}/mural/#carta-${l.id}`;
+    const url = letterUrl(l);
     return `<tr><td style="padding:0 0 20px;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${p.bg};color:${p.fg};border-radius:10px;">
 <tr><td style="padding:24px 26px 6px;font-family:'Courier New',monospace;font-size:11px;letter-spacing:2px;">${esc((l.city + ' · ' + l.hour + 'h').toUpperCase())}</td></tr>
 <tr><td style="padding:6px 26px 10px;font-size:20px;line-height:30px;font-style:italic;">${esc(l.text)}</td></tr>
-<tr><td style="padding:0 26px 22px;font-size:15px;font-style:italic;">— alguém de ${esc(l.city)} · <a href="${esc(url)}" style="color:${p.fg};">ler no mural</a></td></tr>
+<tr><td style="padding:0 26px 22px;font-size:15px;font-style:italic;">— alguém de ${esc(l.city)} · <a href="${esc(url)}" style="color:${p.fg};">ler a carta</a></td></tr>
 </table></td></tr>`;
   }).join('');
   const html = shell('A Caixa da semana', `
@@ -50,7 +50,7 @@ ${cards}
 <tr><td style="padding:8px 0 28px;"><a href="${SITE()}/escrever/" style="display:inline-block;padding:14px 28px;border-radius:999px;background:${C.coral};color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:15px;text-decoration:none;">Escrever uma carta</a></td></tr>`,
     `Você recebe isto porque entrou no clube do letterclub. <a href="${esc(unsubLink)}" style="color:${C.muted};">Sair do clube</a> — um clique e pronto.`);
   const text = 'As cartas mais curtidas da semana\n\n' +
-    letters.map((l) => `${l.text}\n— alguém de ${l.city}, às ${l.hour}h\n${SITE()}/mural/#carta-${l.id}`).join('\n\n') +
+    letters.map((l) => `${l.text}\n— alguém de ${l.city}, às ${l.hour}h\n${letterUrl(l)}`).join('\n\n') +
     `\n\nSair do clube: ${unsubLink}`;
   return { subject: 'A Caixa da semana: as cartas mais curtidas', html, text };
 }

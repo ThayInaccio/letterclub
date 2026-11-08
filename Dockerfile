@@ -10,8 +10,10 @@ RUN npm ci
 FROM deps AS build
 COPY . .
 ARG SITE_URL
+# opcional: contador de visitas (Umami). No Railway, a variável do serviço web vira build arg.
+ARG UMAMI_WEBSITE_ID
 RUN test -n "$SITE_URL" || (echo "passe --build-arg SITE_URL=https://seu-dominio" && exit 1)
-RUN SITE_URL=$SITE_URL npm run build
+RUN SITE_URL=$SITE_URL UMAMI_WEBSITE_ID=$UMAMI_WEBSITE_ID npm run build
 
 # ---- API (Node + Postgres) ----
 FROM node:22-alpine AS api

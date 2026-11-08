@@ -77,6 +77,16 @@ textarea::placeholder{color:#7a5a4e;opacity:1}
 </fieldset>
 
 <div style="display: flex; flex-direction: column; gap: 8px;">
+<label for="lc-tema" style="font-size: 14px; line-height: 20px; font-weight: 500;">Essa carta é</label>
+<select id="lc-tema" value="{{theme}}" onChange="{{onTheme}}" style="min-height: 48px; padding: 0 14px; border-radius: 4px; border: 1.5px solid #a88676; background: #fffaf4; color: #3a2620; font-family: inherit; font-size: 17px; line-height: 27px;">
+<sc-for list="{{themes}}" as="o" hint-placeholder-count="6">
+<option value="{{o.id}}">{{o.label}}</option>
+</sc-for>
+</select>
+<p style="margin: 0; font-size: 13px; line-height: 18px; color: #7a5a4e;">Ajuda a carta a encontrar quem precisa dela, se um dia for pro mural.</p>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 8px;">
 <label for="lc-cidade" style="font-size: 14px; line-height: 20px; font-weight: 500;">De onde você escreve</label>
 <select id="lc-cidade" value="{{city}}" onChange="{{onCity}}" style="min-height: 48px; padding: 0 14px; border-radius: 4px; border: 1.5px solid #a88676; background: #fffaf4; color: #3a2620; font-family: inherit; font-size: 17px; line-height: 27px;">
 <sc-for list="{{cities}}" as="o" hint-placeholder-count="8">
@@ -158,7 +168,7 @@ textarea::placeholder{color:#7a5a4e;opacity:1}
 <p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 36px; line-height: 40px;">Sua carta está a caminho.</p>
 <p style="margin: 0; font-size: 17px; line-height: 27px; color: #7a5a4e;">Ela chega em 2 dias na caixa de alguém. Você nunca vai saber quem — e tudo bem.</p>
 </div>
-<p style="margin: 0; max-width: 440px; font-size: 15px; line-height: 24px; color: #7a5a4e; animation: lc-rise 700ms ease-out 1100ms both;">Quer que mais gente leia? Na <a href="Caixa.dc.html">sua caixa</a>, em “Enviadas”, dá pra pendurar a carta no mural.</p>
+<p style="margin: 0; max-width: 440px; font-size: 15px; line-height: 24px; color: #7a5a4e; animation: lc-rise 700ms ease-out 1100ms both;">Quer que mais gente leia? Na <a href="Caixa.dc.html">sua caixa</a>, em “Enviadas”, dá pra pendurar a carta no mural. Lá ela fica pública, sem seu nome.</p>
 <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; animation: lc-rise 700ms ease-out 1300ms both;">
 <button type="button" onClick="{{again}}" style="min-height: 52px; padding: 0 28px; border-radius: 999px; border: 0; background: #c23b32; color: #ffffff; font-family: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer;">Escrever outra carta</button>
 <a href="Mural.dc.html" style="display: inline-flex; align-items: center; min-height: 52px; padding: 0 28px; border-radius: 999px; border: 1.5px solid #a88676; color: #3a2620; font-size: 14px; line-height: 20px; font-weight: 500; text-decoration: none;">Ver o mural</a>
@@ -171,8 +181,24 @@ textarea::placeholder{color:#7a5a4e;opacity:1}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
 class Component extends DCLogic {
-  state = { text: '', pen: 0, paper: 0, texture: 0, city: 'São Paulo', phase: 'writing', listening: false, interim: '', micMsg: '', saving: false, savedAt: null, restored: false, storeOk: true };
+  state = { text: '', pen: 0, paper: 0, texture: 0, city: 'São Paulo', theme: 'desconhecido', phase: 'writing', listening: false, interim: '', micMsg: '', saving: false, savedAt: null, restored: false, storeOk: true };
+  // mesma lista de server/temas.js (tests/temas.test.mjs confere)
+  temas() {
+    return [
+      { id: 'desconhecido', label: 'para um desconhecido' },
+      { id: 'amor', label: 'de amor' },
+      { id: 'amizade', label: 'para amigos' },
+      { id: 'familia', label: 'para a família' },
+      { id: 'saudade', label: 'de saudade' },
+      { id: 'dias-dificeis', label: 'para dias difíceis' }
+    ];
+  }
   componentDidMount() {
+    // /escrever/?tema=amor (links das páginas de tema) já escolhe o tema
+    try {
+      const t = new URLSearchParams(window.location.search).get('tema');
+      if (this.temas().some((x) => x.id === t)) this.setState({ theme: t });
+    } catch (e) {}
     try {
       const raw = window.localStorage.getItem('letterclub:rascunho');
       if (raw) {
@@ -180,7 +206,8 @@ class Component extends DCLogic {
         if (d && d.text) {
           this.setState({
             text: String(d.text).slice(0, 700), pen: d.pen || 0, paper: d.paper || 0, texture: d.texture || 0,
-            city: d.city || 'São Paulo', savedAt: this.hhmm(d.savedAt), restored: true
+            city: d.city || 'São Paulo', savedAt: this.hhmm(d.savedAt), restored: true,
+            ...(this.temas().some((x) => x.id === d.theme) ? { theme: d.theme } : {})
           });
         }
       }
@@ -213,7 +240,7 @@ class Component extends DCLogic {
         return;
       }
       const now = new Date().toISOString();
-      window.localStorage.setItem('letterclub:rascunho', JSON.stringify({ text: s.text, pen: s.pen, paper: s.paper, texture: s.texture, city: s.city, savedAt: now }));
+      window.localStorage.setItem('letterclub:rascunho', JSON.stringify({ text: s.text, pen: s.pen, paper: s.paper, texture: s.texture, city: s.city, theme: s.theme, savedAt: now }));
       this.setState({ saving: false, savedAt: this.hhmm(now), storeOk: true });
     } catch (e) {
       this.setState({ saving: false, storeOk: false });
@@ -325,6 +352,9 @@ class Component extends DCLogic {
       cities: CITIES.map((name) => ({ name })),
       city: st.city || 'São Paulo',
       onCity: (e) => this.update({ city: e.target.value }),
+      themes: this.temas(),
+      theme: st.theme || 'desconhecido',
+      onTheme: (e) => this.update({ theme: e.target.value }),
       text,
       max: MAX,
       onText: (e) => this.update({ text: String(e.target.value || '').slice(0, MAX) }),
@@ -375,7 +405,7 @@ class Component extends DCLogic {
         this.setState({ phase: 'sending', sendError: '' });
         clearTimeout(this.timer);
         const envelope = new Promise((r) => { this.timer = setTimeout(r, 700); });
-        const req = this.api('POST', '/cartas', { text, pen: st.pen || 0, paper: st.paper || 0, texture: tex, city: st.city || 'São Paulo', hour: new Date().getHours() });
+        const req = this.api('POST', '/cartas', { text, pen: st.pen || 0, paper: st.paper || 0, texture: tex, city: st.city || 'São Paulo', theme: st.theme || 'desconhecido', hour: new Date().getHours() });
         // o rascunho só some depois que o servidor confirmou
         Promise.all([req, envelope]).then(
           () => { this.clearDraft(); this.setState({ phase: 'sent' }); },

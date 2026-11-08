@@ -86,3 +86,22 @@ CREATE TABLE IF NOT EXISTS orders (
   status          text NOT NULL,
   created_at      timestamptz NOT NULL DEFAULT now()
 );
+
+-- SEO: cada carta do mural vira uma página (/carta/<num>-<slug>/) e tem um tema.
+ALTER TABLE letters ADD COLUMN IF NOT EXISTS theme text NOT NULL DEFAULT 'desconhecido';
+ALTER TABLE letters ADD COLUMN IF NOT EXISTS num bigserial;
+CREATE UNIQUE INDEX IF NOT EXISTS letters_num ON letters (num);
+-- Moderação: pendente (no mural, fora do Google) | aprovada (entra no Google) | oculta (sai de tudo)
+ALTER TABLE letters ADD COLUMN IF NOT EXISTS mod_status  text NOT NULL DEFAULT 'pendente';
+ALTER TABLE letters ADD COLUMN IF NOT EXISTS reports     integer NOT NULL DEFAULT 0;
+ALTER TABLE letters ADD COLUMN IF NOT EXISTS reviewed_at timestamptz;
+CREATE INDEX IF NOT EXISTS letters_theme_public ON letters (theme, published_at DESC) WHERE published_at IS NOT NULL AND mod_status = 'aprovada';
+CREATE INDEX IF NOT EXISTS letters_mod_queue    ON letters (published_at) WHERE published_at IS NOT NULL AND (mod_status = 'pendente' OR reports > 0);
+
+-- Uma denúncia por pessoa por carta.
+CREATE TABLE IF NOT EXISTS letter_reports (
+  session_id  uuid NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
+  letter_id   uuid NOT NULL REFERENCES letters(id) ON DELETE CASCADE,
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (session_id, letter_id)
+);
